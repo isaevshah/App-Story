@@ -13,16 +13,13 @@ import lombok.NoArgsConstructor;
 public class Profile {
     @Id
     private Long id; // Используем тот же ID, что и в User
-
     private String phoneNumber;
     private String email;
-
     // Поля для Юр-лица
     private String firstName;
     private String lastName;
-    private String BIN; // Бизнес-идентификационный номер
+    private String bin; // Бизнес-идентификационный номер
     private String companyName;
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")

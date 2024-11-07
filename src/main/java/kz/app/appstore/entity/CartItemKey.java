@@ -17,10 +17,7 @@ import java.io.Serializable;
 public class CartItemKey implements Serializable {
     @Column(name = "cart_id")
     private Long cartId;
-
     @Column(name = "product_id")
     private Long productId;
-
     // hashCode и equals методы
 }
-

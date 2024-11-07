@@ -14,14 +14,11 @@ import java.util.List;
 public class Cart {
     @Id
     private Long id; // Используем тот же ID, что и в User
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
-
     private Double totalPrice;
-
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     private List<CartItem> cartItems;
 }

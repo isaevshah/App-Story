@@ -16,21 +16,15 @@ public class PurchaseRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Date requestDate;
-
     @Enumerated(EnumType.STRING)
     private PurchaseRequestStatus status;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
     // Может быть null, если товар отсутствует в каталоге
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = true)
     private Product product;
-
     private String requestedProductName; // Если товар отсутствует в каталоге
-
 }

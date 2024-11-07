@@ -15,7 +15,6 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String description;
     private Double price;
@@ -25,13 +24,10 @@ public class Product {
     private String brand;
     private Double rating;
     private String qrCode; // QR-код для товара
-
     @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItems;
-
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
-
     @OneToMany(mappedBy = "product")
     private List<PurchaseRequest> purchaseRequests;
 }

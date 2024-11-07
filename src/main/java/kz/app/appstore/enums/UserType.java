@@ -4,4 +4,3 @@ public enum UserType {
     JURIDICAL, // Юр-лицо
     PHYSICAL   // Физ-лицо
 }
-
