@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     @Autowired
-    private UserRepository userRepository; // Предполагается, что у вас есть UserRepository
+    private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -35,16 +35,12 @@ public class UserService {
         // Установка дополнительных полей в зависимости от UserType
         Profile profile = new Profile();
         profile.setPhoneNumber(registrationDTO.getPhoneNumber());
+        profile.setFirstName(registrationDTO.getFirstName());
+        profile.setLastName(registrationDTO.getLastName());
         if (registrationDTO.getUserType() == UserType.JURIDICAL) {
-            // Поля для юридического лица
             profile.setBin(registrationDTO.getBin());
             profile.setCompanyName(registrationDTO.getCompanyName());
-        } else {
-            // Поля для физического лица
-            profile.setFirstName(registrationDTO.getFirstName());
-            profile.setLastName(registrationDTO.getLastName());
         }
-
         user.setProfile(profile);
         profile.setUser(user);
 

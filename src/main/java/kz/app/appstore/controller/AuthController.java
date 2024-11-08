@@ -7,10 +7,9 @@ import kz.app.appstore.dto.RefreshTokenRequestDto;
 import kz.app.appstore.dto.UserRegistrationDTO;
 import kz.app.appstore.service.UserService;
 import kz.app.appstore.service.impl.UserDetailsServiceImpl;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-// AuthController.java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.authentication.*;
@@ -29,16 +28,23 @@ public class AuthController {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
     @Autowired
-    private UserService userService; // Предполагается, что у вас есть UserService
+    private UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegistrationDTO registrationDTO) {
-        // Логика регистрации
         try {
             userService.registerUser(registrationDTO);
-            return ResponseEntity.ok("User registered successfully");
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            registrationDTO.getUsername(),
+                            registrationDTO.getPassword()
+                    )
+            );
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String accessToken = jwtUtil.generateAccessToken(userDetails);
+            String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+            return ResponseEntity.ok(new AuthResponseDto(accessToken, refreshToken));
         } catch (Exception e) {
-            // Обработка исключений
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -52,27 +58,30 @@ public class AuthController {
                             loginRequest.getPassword()
                     )
             );
-
-            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String accessToken = jwtUtil.generateAccessToken(userDetails);
             String refreshToken = jwtUtil.generateRefreshToken(userDetails);
-
-            // Возвращаем токены в ответе
             return ResponseEntity.ok(new AuthResponseDto(accessToken, refreshToken));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверные учетные данные");
+        } catch (DisabledException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Аккаунт отключен");
+        } catch (LockedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Аккаунт заблокирован");
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Ошибка аутентификации");
         }
     }
 
-    // Эндпоинт для обновления токена
-    @PostMapping("/refresh")
+    @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDto request) {
         String refreshToken = request.getRefreshToken();
         if (jwtUtil.validateToken(refreshToken)) {
             String username = jwtUtil.getUsernameFromToken(refreshToken);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             String newAccessToken = jwtUtil.generateAccessToken(userDetails);
-            return ResponseEntity.ok(new AuthResponseDto(newAccessToken, refreshToken));
+            String newRefreshToken = jwtUtil.generateRefreshToken(userDetails);
+            return ResponseEntity.ok(new AuthResponseDto(newAccessToken, newRefreshToken));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Refresh Token");
         }

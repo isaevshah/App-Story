@@ -12,13 +12,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Profile {
     @Id
-    private Long id; // Используем тот же ID, что и в User
+    private Long id;
     private String phoneNumber;
-    private String email;
-    // Поля для Юр-лица
     private String firstName;
     private String lastName;
-    private String bin; // Бизнес-идентификационный номер
+    // Поля для Юр-лица
+    private String bin;
     private String companyName;
     @OneToOne
     @MapsId
