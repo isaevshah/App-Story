@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 @Getter
@@ -19,5 +20,20 @@ public class OrderItemKey implements Serializable {
     private Long orderId;
     @Column(name = "product_id")
     private Long productId;
+
     // hashCode и equals методы
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OrderItemKey)) return false;
+        OrderItemKey that = (OrderItemKey) o;
+        return Objects.equals(orderId, that.orderId) &&
+                Objects.equals(productId, that.productId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orderId, productId);
+    }
+
 }

@@ -28,7 +28,7 @@ public class UserService {
         User user = new User();
         user.setUsername(registrationDTO.getUsername());
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        user.setRole(Role.CUSTOMER); // Или любая роль по умолчанию
+        user.setRole(Role.CUSTOMER);
         user.setUserType(registrationDTO.getUserType());
         user.setActive(true);
 
