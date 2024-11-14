@@ -1,4 +1,4 @@
-package kz.app.appstore.dto;
+package kz.app.appstore.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,10 +1,10 @@
 package kz.app.appstore.controller;
 
 import kz.app.appstore.config.JwtUtil;
-import kz.app.appstore.dto.AuthResponseDto;
-import kz.app.appstore.dto.LoginRequestDto;
-import kz.app.appstore.dto.RefreshTokenRequestDto;
-import kz.app.appstore.dto.UserRegistrationDTO;
+import kz.app.appstore.dto.auth.AuthResponseDto;
+import kz.app.appstore.dto.auth.LoginRequestDto;
+import kz.app.appstore.dto.auth.RefreshTokenRequestDto;
+import kz.app.appstore.dto.auth.UserRegistrationDTO;
 import kz.app.appstore.service.UserService;
 import kz.app.appstore.service.impl.UserDetailsServiceImpl;
 import org.springframework.security.core.AuthenticationException;
@@ -44,7 +44,7 @@ public class AuthController {
             String accessToken = jwtUtil.generateAccessToken(userDetails);
             String refreshToken = jwtUtil.generateRefreshToken(userDetails);
             return ResponseEntity.ok(new AuthResponseDto(accessToken, refreshToken));
-        } catch (Exception e) {
+        } catch (Exception e) { // Добавить ValidationException, UserAlreadyExistsException
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }

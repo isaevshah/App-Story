@@ -39,7 +39,6 @@ public class JwtUtil {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-                // Или .signWith(getSigningKey()) если алгоритм выводится из ключа
                 .compact();
     }
 

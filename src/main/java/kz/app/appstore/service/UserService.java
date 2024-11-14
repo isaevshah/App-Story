@@ -2,7 +2,7 @@ package kz.app.appstore.service;
 
 // UserService.java
 import jakarta.validation.ValidationException;
-import kz.app.appstore.dto.UserRegistrationDTO;
+import kz.app.appstore.dto.auth.UserRegistrationDTO;
 import kz.app.appstore.entity.Profile;
 import kz.app.appstore.entity.User;
 import kz.app.appstore.enums.Role;

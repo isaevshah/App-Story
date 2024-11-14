@@ -1,4 +1,4 @@
-package kz.app.appstore.dto;
+package kz.app.appstore.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

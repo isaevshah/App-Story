@@ -1,14 +1,17 @@
-package kz.app.appstore.service;
+package kz.app.appstore.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ValidationException;
-import kz.app.appstore.dto.AdminUserCreationDTO;
+import kz.app.appstore.dto.auth.AdminUserCreationDTO;
 import kz.app.appstore.entity.Profile;
 import kz.app.appstore.entity.User;
 import kz.app.appstore.enums.Role;
 import kz.app.appstore.enums.UserType;
 import kz.app.appstore.repository.UserRepository;
+import kz.app.appstore.service.AdminService;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.service.spi.ServiceException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,10 +19,12 @@ import org.springframework.stereotype.Service;
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminServiceImpl(UserRepository userRepository, ObjectMapper objectMapper) {
+    public AdminServiceImpl(UserRepository userRepository, ObjectMapper objectMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.objectMapper = objectMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -31,7 +36,7 @@ public class AdminServiceImpl implements AdminService {
 
             User user = new User();
             user.setUsername(userCreationDTO.getUsername());
-            user.setPassword(userCreationDTO.getPassword());
+            user.setPassword(passwordEncoder.encode(userCreationDTO.getPassword()));
             if (userCreationDTO.getIsManager()) {
                 user.setRole(Role.MANAGER);
             } else {
@@ -51,6 +56,7 @@ public class AdminServiceImpl implements AdminService {
             log.info("Created user: {}", objectMapper.writeValueAsString(user));
         } catch (Exception e) {
             log.error("Error creating user", e);
+            throw new ServiceException("Failed to create user", e);
         }
     }
 
