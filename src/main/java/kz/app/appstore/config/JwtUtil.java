@@ -18,10 +18,10 @@ public class JwtUtil {
     private String jwtSecret; // Должен быть Base64-encoded строкой
 
     @Value("${jwt.accessTokenExpiration}")
-    private long accessTokenExpiration; // В миллисекундах
+    private long accessTokenExpiration;
 
     @Value("${jwt.refreshTokenExpiration}")
-    private long refreshTokenExpiration; // В миллисекундах
+    private long refreshTokenExpiration;
 
     // Генерация Access Token
     public String generateAccessToken(UserDetails userDetails) {
