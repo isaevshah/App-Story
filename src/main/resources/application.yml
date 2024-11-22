@@ -2,9 +2,9 @@ spring:
   application:
     name: AppStore
   datasource:
-    url: jdbc:postgresql://USER_APP:MjejSUxqXfFkrbrlbfbudBWTnrMdoCIS@postgres.railway.internal:5432/railway
-    username: USER_APP
-    password: MjejSUxqXfFkrbrlbfbudBWTnrMdoCIS
+    url: jdbc:postgresql://junction.proxy.rlwy.net:37076/railway
+    username: postgres
+    password: DvbLjnzswsZaBeQPJRfCZeZcyddKDpbA
   jpa:
     properties:
       hibernate:
@@ -14,4 +14,4 @@ spring:
 jwt:
   accessTokenExpiration: '3600000'
   refreshTokenExpiration: '604800000'
-  secret: YourStrongSecretKey
+  secret: JcSCqHyIBr8M2BF2bcSpn0ukRcUymML0hT8ubI0b2cgDxjkELtTABWaYzzdi3LGnLITqyCNzQ3WCetgwmPnDp1Ik3R5NoVeS2Pve17wMyj3EX2TmMdSjE2q9u7eqdpTZ8su3dWyVQzaLajmBD7sxa8W3mpyU3Sh99rz85L0

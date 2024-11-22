@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "order_item")
 public class OrderItem {
     @EmbeddedId
     private OrderItemKey id;

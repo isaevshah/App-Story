@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
+@Table(name = "profile") // Avoid using reserved keywords
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

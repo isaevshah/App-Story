@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "cart")
 public class Cart {
     @Id
     private Long id; // Используем тот же ID, что и в User

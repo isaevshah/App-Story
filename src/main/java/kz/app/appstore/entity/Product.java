@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
+@Table(name = "product") // Avoid using reserved keywords
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -18,11 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -55,8 +54,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-    }
 }

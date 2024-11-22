@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
+@Table(name = "purchase_request") // Avoid using reserved keywords
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

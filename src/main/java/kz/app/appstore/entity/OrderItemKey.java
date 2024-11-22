@@ -2,6 +2,7 @@ package kz.app.appstore.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "order_item_key")
 public class OrderItemKey implements Serializable {
     @Column(name = "order_id")
     private Long orderId;

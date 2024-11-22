@@ -2,6 +2,7 @@ package kz.app.appstore.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "cart_item_key")
 public class CartItemKey implements Serializable {
     @Column(name = "cart_id")
     private Long cartId;

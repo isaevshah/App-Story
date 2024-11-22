@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
+@Table(name = "users") // Avoid using reserved keywords
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

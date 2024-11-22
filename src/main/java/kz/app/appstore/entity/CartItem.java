@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "cart_item")
 public class CartItem {
     @EmbeddedId
     private CartItemKey id;
