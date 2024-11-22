@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: AppStore
+  datasource:
+    url: jdbc:postgresql://USER_APP:MjejSUxqXfFkrbrlbfbudBWTnrMdoCIS@postgres.railway.internal:5432/railway
+    username: USER_APP
+    password: MjejSUxqXfFkrbrlbfbudBWTnrMdoCIS
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+jwt:
+  accessTokenExpiration: '3600000'
+  refreshTokenExpiration: '604800000'
+  secret: YourStrongSecretKey
