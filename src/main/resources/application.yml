@@ -15,3 +15,5 @@ jwt:
   accessTokenExpiration: '3600000'
   refreshTokenExpiration: '604800000'
   secret: JcSCqHyIBr8M2BF2bcSpn0ukRcUymML0hT8ubI0b2cgDxjkELtTABWaYzzdi3LGnLITqyCNzQ3WCetgwmPnDp1Ik3R5NoVeS2Pve17wMyj3EX2TmMdSjE2q9u7eqdpTZ8su3dWyVQzaLajmBD7sxa8W3mpyU3Sh99rz85L0
+server:
+  port: 8080
