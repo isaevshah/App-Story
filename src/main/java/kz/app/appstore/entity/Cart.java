@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "cart")
 public class Cart {
     @Id
-    private Long id; // Используем тот же ID, что и в User
+    private Long id;
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")

@@ -23,7 +23,6 @@ public class OrderItemKey implements Serializable {
     @Column(name = "product_id")
     private Long productId;
 
-    // hashCode и equals методы
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

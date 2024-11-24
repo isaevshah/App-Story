@@ -7,9 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
-@Table(name = "purchase_request") // Avoid using reserved keywords
+@Table(name = "purchase_request")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,6 +36,9 @@ public class PurchaseRequest {
     @ManyToOne
     @JoinColumn(name = "manager_id", nullable = true)
     private User processedBy; // Менеджер, обработавший запрос
+
+    @OneToMany(mappedBy = "purchaseRequest", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PurchaseRequestStatusHistory> statusHistories;
 
     private String requestedProductName; // Название запрашиваемого товара, если его нет в каталоге
 
