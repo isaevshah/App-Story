@@ -47,18 +47,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("https://app-story-production.up.railway.app"); // Разрешаем запросы со всех доменов (для тестирования)
-        configuration.addAllowedMethod("*"); // Разрешаем все методы (GET, POST, DELETE и т.д.)
-        configuration.addAllowedHeader("*"); // Разрешаем все заголовки
-        configuration.setAllowCredentials(true); // Разрешаем отправку куки
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
