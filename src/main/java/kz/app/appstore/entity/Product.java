@@ -25,6 +25,9 @@ public class Product {
     private String brand;
     private Double rating;
     private String qrCode; // QR-код для товара
+    @ManyToOne
+    @JoinColumn(name = "catalog_id", nullable = false)
+    private Catalog catalog;
     @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItems;
     @OneToMany(mappedBy = "product")
