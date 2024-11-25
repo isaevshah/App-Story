@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CatalogRepository extends JpaRepository<Catalog, Long> {
-    void delete(Optional<Catalog> catalog);
-
     @Query("SELECT c FROM Catalog c WHERE c.parentCatalog = :catalog")
     List<Catalog> findByParentCatalog(@Param("catalog") Catalog catalog);
 }

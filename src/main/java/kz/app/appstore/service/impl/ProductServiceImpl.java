@@ -49,8 +49,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteCatalog(Long id) {
-        Optional<Catalog> catalog = catalogRepository.findById(id);
-        catalogRepository.delete(catalog);
+        Catalog catalog = catalogRepository.findById(id).orElse(null);
+        if (catalog != null) {
+            catalogRepository.delete(catalog);
+        }
     }
 
     @Override
