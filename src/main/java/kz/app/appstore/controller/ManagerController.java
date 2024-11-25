@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/manager")
-@PreAuthorize(value = "hasRole('MANAGER')")
+@PreAuthorize(value = "hasAnyRole('MANAGER', 'ADMIN')")
 public class ManagerController {
     private final ProductService productService;
 
