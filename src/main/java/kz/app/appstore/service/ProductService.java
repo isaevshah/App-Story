@@ -1,10 +1,16 @@
 package kz.app.appstore.service;
 
-import kz.app.appstore.dto.product.CreateProductRequest;
-import kz.app.appstore.dto.product.CreateProductResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import kz.app.appstore.dto.catalog.CreateCatalogRequest;
+import kz.app.appstore.entity.Catalog;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 public interface ProductService {
-    CreateProductResponse createProduct(CreateProductRequest createProductRequest);
-    void deleteProduct(Long id);
-    void updateProduct(Long id, CreateProductRequest createProductRequest);
+    Catalog createCatalog(CreateCatalogRequest catalogRequest);
+    Catalog createUnderCatalog(Long id,CreateCatalogRequest catalogRequest);
+    void deleteCatalog(Long id);
+    List<Catalog> getAllCatalogs() throws JsonProcessingException;
+    List<Catalog> getAllCatalogsByParentId(Long parentCatalogId) throws JsonProcessingException;
 }

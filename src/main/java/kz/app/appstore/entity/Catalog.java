@@ -19,7 +19,7 @@ public class Catalog {
     private String name;
     private String description;
     @ManyToOne
-    @JoinColumn(name = "parent_id", nullable = true)
+    @JoinColumn(name = "parent_id")
     private Catalog parentCatalog;
     @OneToMany(mappedBy = "parentCatalog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Catalog> subCatalogs;
