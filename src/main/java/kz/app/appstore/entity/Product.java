@@ -17,14 +17,11 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String description;
     private Double price;
-    private String category;
-    private Integer quantity;
+    private Long quantity;
     private String imageUrl;
-    private String brand;
-    private Double rating;
-    private String qrCode; // QR-код для товара
+    @Column(columnDefinition = "json")
+    private String specificParams;
     @ManyToOne
     @JoinColumn(name = "catalog_id", nullable = false)
     private Catalog catalog;

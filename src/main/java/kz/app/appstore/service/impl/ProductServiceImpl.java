@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kz.app.appstore.dto.catalog.CreateCatalogRequest;
 import kz.app.appstore.entity.Catalog;
+import kz.app.appstore.entity.Product;
 import kz.app.appstore.repository.CatalogRepository;
 import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.service.ProductService;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -74,4 +76,29 @@ public class ProductServiceImpl implements ProductService {
         }
         return catalogs;
     }
+
+    @Override
+    public Product createProduct(Long catalogId, Map<String, Object> requestData) throws JsonProcessingException {
+        String name = (String) requestData.get("name");
+        Double price = Double.valueOf(requestData.get("price").toString());
+        Long quantity = Long.valueOf(requestData.get("quantity").toString());
+        Catalog catalog = catalogRepository.findById(catalogId).orElseThrow(() -> new RuntimeException("Каталог не найден"));
+
+        Product product = new Product();
+        product.setName(name);
+        product.setPrice(price);
+        product.setQuantity(quantity);
+        product.setCatalog(catalog);
+
+        Map<String, Object> specificParams = (Map<String, Object>) requestData.get("specificParams");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String specificParamsJson = objectMapper.writeValueAsString(specificParams);
+
+        product.setSpecificParams(specificParamsJson);
+
+        productRepository.save(product);
+
+        return product;
+    }
+
 }

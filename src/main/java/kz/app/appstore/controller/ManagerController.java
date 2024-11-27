@@ -3,12 +3,15 @@ package kz.app.appstore.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import kz.app.appstore.dto.catalog.CreateCatalogRequest;
 import kz.app.appstore.entity.Catalog;
+import kz.app.appstore.entity.Product;
 import kz.app.appstore.service.ProductService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/manager")
@@ -45,5 +48,17 @@ public class ManagerController {
     public List<Catalog> getCatalogsByParentId(@PathVariable Long parentCatalogId) throws JsonProcessingException {
         return productService.getAllCatalogsByParentId(parentCatalogId);
     }
+
+    @PostMapping("/catalogs/{catalogId}/products/create")
+    public ResponseEntity<Product> createProduct(@PathVariable Long catalogId, @RequestBody Map<String, Object> requestData) {
+        try {
+            Product product = productService.createProduct(catalogId, requestData);
+            return ResponseEntity.ok(product);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+
 
 }
