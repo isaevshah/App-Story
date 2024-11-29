@@ -1,6 +1,6 @@
 package kz.app.appstore.enums;
 
 public enum UserType {
-    LEGAL, // Юр-лицо
+    JURIDICAL, // Юр-лицо
     PHYSICAL   // Физ-лицо
 }

@@ -37,7 +37,7 @@ public class UserService {
         profile.setPhoneNumber(registrationDTO.getPhoneNumber());
         profile.setFirstName(registrationDTO.getFirstName());
         profile.setLastName(registrationDTO.getLastName());
-        if (registrationDTO.getUserType() == UserType.LEGAL) {
+        if (registrationDTO.getUserType() == UserType.JURIDICAL) {
             profile.setBin(registrationDTO.getBin());
             profile.setCompanyName(registrationDTO.getCompanyName());
         }
