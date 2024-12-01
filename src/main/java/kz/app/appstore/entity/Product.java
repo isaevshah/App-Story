@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,7 +20,8 @@ public class Product {
     private String name;
     private Double price;
     private Long quantity;
-    private String imageUrl;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductImage> images = new ArrayList<>();
     @Column(columnDefinition = "json")
     private String specificParams;
     @ManyToOne
