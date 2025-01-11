@@ -10,7 +10,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
   servlet:
     multipart:
       max-file-size: 1MB

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "product") // Avoid using reserved keywords
+@Table(name = "product")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
