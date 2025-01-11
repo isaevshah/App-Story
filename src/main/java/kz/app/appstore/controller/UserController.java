@@ -47,8 +47,16 @@ public class UserController {
     }
 
     @GetMapping("/catalogs/{parentCatalogId}/get")
-    public List<CatalogResponse> getCatalogsByParentId(@PathVariable Long parentCatalogId) throws JsonProcessingException {
-        return productService.getAllCatalogsByParentId(parentCatalogId);
+    public ResponseEntity<?> getCatalogsByParentId(@PathVariable Long parentCatalogId) {
+        try {
+            List<CatalogResponse> catalogs = productService.getAllCatalogsByParentId(parentCatalogId);
+            return ResponseEntity.ok(catalogs);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
+        }
     }
+
 
 }

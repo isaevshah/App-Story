@@ -11,6 +11,7 @@ import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.AdminService;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,47 +19,44 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
-    private final ObjectMapper objectMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public AdminServiceImpl(UserRepository userRepository, ObjectMapper objectMapper, PasswordEncoder passwordEncoder) {
+    public AdminServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.objectMapper = objectMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void createManager(AdminUserCreationDTO userCreationDTO) {
-        try {
-            if (userRepository.existsByUsername(userCreationDTO.getUsername())) {
-                throw new ValidationException("Username already exists");
-            }
-
-            User user = new User();
-            user.setUsername(userCreationDTO.getUsername());
-            user.setPassword(passwordEncoder.encode(userCreationDTO.getPassword()));
-            if (userCreationDTO.getIsManager()) {
-                user.setRole(Role.MANAGER);
-            } else {
-                user.setRole(Role.WAREHOUSE_WORKER);
-            }
-            user.setUserType(UserType.PHYSICAL);
-            user.setActive(true);
-
-            Profile profile = new Profile();
-            profile.setPhoneNumber(userCreationDTO.getPhoneNumber());
-            profile.setFirstName(userCreationDTO.getFirstName());
-            profile.setLastName(userCreationDTO.getLastName());
-            user.setProfile(profile);
-            profile.setUser(user);
-
-            userRepository.save(user);
-            log.info("Created user: {}", objectMapper.writeValueAsString(user));
-        } catch (Exception e) {
-            log.error("Error creating user", e);
-            throw new ServiceException("Failed to create user", e);
+        if (userRepository.existsByUsername(userCreationDTO.getUsername())) {
+            throw new ValidationException("Username already exists");
         }
+
+        User user = buildUserFromDTO(userCreationDTO);
+
+        userRepository.save(user);
+        log.info("Created user with username: {}", user.getUsername());
     }
+
+    private User buildUserFromDTO(AdminUserCreationDTO userCreationDTO) {
+        User user = new User();
+        user.setUsername(userCreationDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(userCreationDTO.getPassword()));
+        user.setRole(userCreationDTO.getIsManager() ? Role.MANAGER : Role.WAREHOUSE_WORKER);
+        user.setUserType(UserType.PHYSICAL);
+        user.setActive(true);
+
+        Profile profile = new Profile();
+        profile.setPhoneNumber(userCreationDTO.getPhoneNumber());
+        profile.setFirstName(userCreationDTO.getFirstName());
+        profile.setLastName(userCreationDTO.getLastName());
+        profile.setUser(user);
+
+        user.setProfile(profile);
+
+        return user;
+    }
+
 
     @Override
     public void deleteManager(Long id) {

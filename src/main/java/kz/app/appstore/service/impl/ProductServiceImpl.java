@@ -86,19 +86,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<CatalogResponse> getAllCatalogsByParentId(Long parentCatalogId) throws JsonProcessingException {
-        List<Catalog> catalogs = List.of();
-        if (parentCatalogId != null) {
-            Catalog catalog = catalogRepository.findById(parentCatalogId).orElse(null);
-            if (catalog != null) {
-                catalogs = catalogRepository.findByParentCatalog(catalog);
-            }
-            log.info("Got catalogs by parentCatalogId {}{}", catalog.getId(), objectMapper.writeValueAsString(catalogs));
+    public List<CatalogResponse> getAllCatalogsByParentId(Long parentCatalogId) {
+        if (parentCatalogId == null) {
+            throw new IllegalArgumentException("Parent catalog ID cannot be null");
         }
+        if (!catalogRepository.existsById(parentCatalogId)) {
+            throw new RuntimeException("Parent catalog not found with ID: " + parentCatalogId);
+        }
+        List<Catalog> catalogs = catalogRepository.findByParentCatalogId(parentCatalogId);
         return catalogs.stream()
                 .map(this::toCatalogResponse)
                 .toList();
     }
+
 
     @Override
     @Transactional
