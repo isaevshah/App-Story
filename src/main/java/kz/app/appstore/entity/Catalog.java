@@ -1,5 +1,7 @@
 package kz.app.appstore.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,8 +22,10 @@ public class Catalog {
     private String description;
     @ManyToOne
     @JoinColumn(name = "parent_id")
+    @JsonBackReference
     private Catalog parentCatalog;
     @OneToMany(mappedBy = "parentCatalog", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Catalog> subCatalogs;
     @OneToMany(mappedBy = "catalog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
