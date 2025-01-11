@@ -20,9 +20,9 @@ public class Product {
     private String name;
     private Double price;
     private Long quantity;
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "text")
     private String specificParams;
     @ManyToOne
     @JoinColumn(name = "catalog_id", nullable = false)

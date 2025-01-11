@@ -11,4 +11,8 @@ import org.springframework.data.repository.query.Param;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.catalog = :catalog")
     Page<Product> findByCatalog(@Param("catalog") Catalog catalog, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.catalog.id = :catalogId")
+    Page<Product> findByCatalogId(@Param("catalogId") Long catalogId, Pageable pageable);
+
 }

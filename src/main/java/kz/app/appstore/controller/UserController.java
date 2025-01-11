@@ -3,6 +3,7 @@ package kz.app.appstore.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.catalog.ProductResponse;
+import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -23,18 +24,20 @@ public class UserController {
     }
 
     @GetMapping("/catalogs/{catalogId}/products")
-    public ResponseEntity<Page<ProductResponse>> getProductsByCatalogId(
+    public ResponseEntity<?> getProductsByCatalogId(
             @PathVariable Long catalogId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String sortDir
     ) {
         try {
             Page<ProductResponse> products = productService.getProductsByCatalogId(catalogId, page, size, sortBy, sortDir);
             return ResponseEntity.ok(products);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
     }
 

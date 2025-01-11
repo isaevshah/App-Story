@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "product_images") // Avoid using reserved keywords
+@Table(name = "product_images")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +14,7 @@ public class ProductImage {
     @Id
     @GeneratedValue
     private Long id;
-    private String imageUrl; // Путь к изображению на сервере или URL
+    private String imageUrl;
     @ManyToOne
     private Product product;
 }

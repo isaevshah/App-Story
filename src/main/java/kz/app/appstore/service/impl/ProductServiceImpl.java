@@ -104,29 +104,20 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request) throws ProductCreationException {
         try {
-            // Валидация входных данных
             validateInput(request);
-            // Получение каталога
             Catalog catalog = catalogRepository.findById(catalogId)
                     .orElseThrow(() -> new ProductCreationException("Каталог не найден"));
-            // Создание товара
             Product product = new Product();
             product.setName(request.getName());
             product.setPrice(request.getPrice());
             product.setQuantity(request.getQuantity());
             product.setCatalog(catalog);
 
-            // Обработка специфических параметров
             handleSpecificParams(product, request.getSpecificParams());
+            List<ProductImage> productImages = handleImages(request.getImages(), product);
 
-            // Обработка изображений
-            List<ProductImage> productImages = handleImages(request.getImages());
             product.setImages(productImages);
-
-            // Сохранение товара
             product = productRepository.save(product);
-
-            // Создание и возврат DTO ответа
             return createResponseDTO(product);
         } catch (IOException e) {
             throw new ProductCreationException("Ошибка при обработке изображений товара", e);
@@ -147,12 +138,16 @@ public class ProductServiceImpl implements ProductService {
 
     private void handleSpecificParams(Product product, String specificParamsJson) throws IOException {
         if (specificParamsJson != null && !specificParamsJson.trim().isEmpty()) {
-            Map<String, Object> specificParams = objectMapper.readValue(specificParamsJson, Map.class);
+            Map<String, String> specificParams = objectMapper.readValue(specificParamsJson, Map.class);
             product.setSpecificParams(objectMapper.writeValueAsString(specificParams));
+        } else {
+            product.setSpecificParams(null);
         }
     }
 
-    private List<ProductImage> handleImages(MultipartFile[] images) throws IOException {
+
+
+    private List<ProductImage> handleImages(MultipartFile[] images, Product product) throws IOException {
         List<ProductImage> productImages = new ArrayList<>();
         if (images != null) {
             for (MultipartFile image : images) {
@@ -161,6 +156,7 @@ public class ProductServiceImpl implements ProductService {
                     ProductImage productImage = new ProductImage();
                     productImage.setImageUrl("/images/" + fileName);
                     productImages.add(productImage);
+                    productImage.setProduct(product);
                 }
             }
         }
@@ -192,30 +188,33 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> getProductsByCatalogId(Long catalogId, int page, int size, String sortBy, String sortDir) {
-        Catalog catalog = catalogRepository.findById(catalogId)
-                .orElseThrow(() -> new RuntimeException("Каталог не найден"));
+        if (!catalogRepository.existsById(catalogId)) {
+            throw new RuntimeException("Каталог не найден");
+        }
+        List<String> allowedSortFields = Arrays.asList("id", "name", "price", "quantity");
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "id"; // Поле сортировки по умолчанию
+        }
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Product> products = productRepository.findByCatalog(catalog, pageable);
+        Page<Product> products = productRepository.findByCatalogId(catalogId, pageable);
         return products.map(this::convertToProductResponse);
     }
 
 
+
     private ProductResponse convertToProductResponse(Product product) {
-        // Преобразуем специфические параметры из JSON-строки в Map
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> specificParams = new HashMap<>();
         try {
             specificParams = objectMapper.readValue(product.getSpecificParams(), Map.class);
         } catch (JsonProcessingException e) {
-            // Обработка исключения (можно записать в лог)
+            log.error("Ошибка при разборе JSON для specificParams у продукта с ID: {}", product.getId(), e);
         }
-        // Получаем URLs изображений
         List<String> imageUrls = product.getImages().stream()
                 .map(ProductImage::getImageUrl)
                 .collect(Collectors.toList());
 
-        // Создаем и возвращаем DTO
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
@@ -225,6 +224,7 @@ public class ProductServiceImpl implements ProductService {
                 imageUrls
         );
     }
+
 
     public CatalogResponse toCatalogResponse(Catalog catalog) {
         ParentCatalogResponse parentCatalogResponse = null;

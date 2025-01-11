@@ -5,7 +5,6 @@ import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.catalog.CreateProductRequest;
 import kz.app.appstore.dto.catalog.ProductResponseDTO;
 import kz.app.appstore.dto.error.ErrorResponse;
-import kz.app.appstore.entity.Product;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.service.ProductService;
 import org.springframework.http.HttpStatus;
