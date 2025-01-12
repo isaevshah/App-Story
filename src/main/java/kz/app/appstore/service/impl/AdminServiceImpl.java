@@ -71,7 +71,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<EmployeesDto> getAllEmployees() {
-        List<User> employees = userRepository.getAllEmployees(List.of(Role.MANAGER, Role.WAREHOUSE_WORKER));
+        List<User> employees = userRepository.getAllEmployees(List.of(Role.MANAGER, Role.WAREHOUSE_WORKER, Role.ADMIN));
         return employees.stream()
                 .map(user -> {
                     Profile profile = user.getProfile();
