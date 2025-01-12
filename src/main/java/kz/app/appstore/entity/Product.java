@@ -20,6 +20,8 @@ public class Product {
     private String name;
     private Double price;
     private Long quantity;
+    private String description;
+    private Boolean liked = false;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
     @Column(columnDefinition = "text")

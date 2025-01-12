@@ -14,4 +14,5 @@ public interface ProductService {
     List<CatalogResponse> getAllCatalogsByParentId(Long parentCatalogId) throws JsonProcessingException;
     ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request) throws ProductCreationException;
     Page<ProductResponse> getProductsByCatalogId(Long catalogId, int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
+    List<ProductResponse> getLikedProducts();
 }

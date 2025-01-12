@@ -15,6 +15,8 @@ public class ProductResponse {
     private String name;
     private Double price;
     private Long quantity;
+    private String description;
+    private Boolean liked;
     private Map<String, Object> specificParams;
     private List<String> imageUrls;
 }

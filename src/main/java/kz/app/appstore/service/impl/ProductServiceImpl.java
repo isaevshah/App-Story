@@ -201,6 +201,10 @@ public class ProductServiceImpl implements ProductService {
         return products.map(this::convertToProductResponse);
     }
 
+    @Override
+    public List<ProductResponse> getLikedProducts() {
+        return List.of();
+    }
 
 
     private ProductResponse convertToProductResponse(Product product) {
@@ -220,6 +224,8 @@ public class ProductServiceImpl implements ProductService {
                 product.getName(),
                 product.getPrice(),
                 product.getQuantity(),
+                product.getDescription(),
+                product.getLiked(),
                 specificParams,
                 imageUrls
         );
