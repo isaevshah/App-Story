@@ -1,5 +1,6 @@
 package kz.app.appstore.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kz.app.appstore.dto.catalog.CreateCatalogRequest;
 import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.catalog.CreateProductRequest;
@@ -7,6 +8,7 @@ import kz.app.appstore.dto.catalog.ProductResponseDTO;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.service.ProductService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,16 +18,22 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/manager")
 @PreAuthorize(value = "hasAnyRole('MANAGER', 'ADMIN')")
+@Slf4j
 public class ManagerController {
     private final ProductService productService;
+    private final ObjectMapper objectMapper;
 
-    public ManagerController(ProductService productService) {
+    public ManagerController(ProductService productService, ObjectMapper objectMapper) {
         this.productService = productService;
+        this.objectMapper = objectMapper;
     }
 
     @PostMapping("/catalogs/create")
     public ResponseEntity<CatalogResponse> createCatalog(@RequestBody CreateCatalogRequest request) {
-        return ResponseEntity.ok(productService.createCatalog(request));
+        log.info("Got createCatalog request {}", objectMapper.valueToTree(request));
+        CatalogResponse catalogResponse = productService.createCatalog(request);
+        log.info("Got createCatalog response {}", objectMapper.valueToTree(catalogResponse));
+        return ResponseEntity.ok(catalogResponse);
     }
 
     @PostMapping("/under-catalogs/{parentCatalogId}/create")
