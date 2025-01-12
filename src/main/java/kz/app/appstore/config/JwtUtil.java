@@ -5,6 +5,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
@@ -25,17 +26,26 @@ public class JwtUtil {
 
     // Генерация Access Token
     public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails.getUsername(), accessTokenExpiration);
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse("ROLE_CUSTOMER");
+        return generateToken(userDetails.getUsername(), role, accessTokenExpiration);
     }
 
     // Генерация Refresh Token
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails.getUsername(), refreshTokenExpiration);
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse("ROLE_CUSTOMER");
+        return generateToken(userDetails.getUsername(), role,  refreshTokenExpiration);
     }
 
-    private String generateToken(String username, long expiration) {
+    private String generateToken(String username, String role, long expiration) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
