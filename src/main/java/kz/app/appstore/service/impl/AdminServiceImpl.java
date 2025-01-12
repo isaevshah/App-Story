@@ -1,8 +1,8 @@
 package kz.app.appstore.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ValidationException;
-import kz.app.appstore.dto.auth.AdminUserCreationDTO;
+import kz.app.appstore.dto.admin.AdminUserCreationDTO;
+import kz.app.appstore.dto.admin.EmployeesDto;
 import kz.app.appstore.entity.Profile;
 import kz.app.appstore.entity.User;
 import kz.app.appstore.enums.Role;
@@ -10,10 +10,11 @@ import kz.app.appstore.enums.UserType;
 import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.AdminService;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.service.spi.ServiceException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -67,4 +68,22 @@ public class AdminServiceImpl implements AdminService {
             log.error("Error deleting user", e);
         }
     }
+
+    @Override
+    public List<EmployeesDto> getAllEmployees() {
+        List<User> employees = userRepository.getAllEmployees(List.of(Role.MANAGER, Role.WAREHOUSE_WORKER));
+        return employees.stream()
+                .map(user -> {
+                    Profile profile = user.getProfile();
+                    return new EmployeesDto(
+                            user.getId(),
+                            user.getUsername(),
+                            user.getRole(),
+                            profile != null ? profile.getFirstName() : null,
+                            profile != null ? profile.getLastName() : null
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
 }
