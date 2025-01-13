@@ -206,6 +206,18 @@ public class ProductServiceImpl implements ProductService {
         return List.of();
     }
 
+    @Override
+    public Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String sortDir) throws JsonProcessingException {
+        List<String> allowedSortFields = Arrays.asList("id", "name", "price", "quantity");
+        if (!allowedSortFields.contains(sortBy)) {
+            sortBy = "id"; // Поле сортировки по умолчанию
+        }
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Product> products = productRepository.getAllProducts(pageable);
+        return products.map(this::convertToProductResponse);
+    }
+
 
     private ProductResponse convertToProductResponse(Product product) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -221,6 +233,7 @@ public class ProductServiceImpl implements ProductService {
 
         return new ProductResponse(
                 product.getId(),
+                product.getCatalog().getName(),
                 product.getName(),
                 product.getPrice(),
                 product.getQuantity(),

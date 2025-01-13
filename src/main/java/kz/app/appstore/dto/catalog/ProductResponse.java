@@ -12,6 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class ProductResponse {
     private Long id;
+    private String categoryName;
     private String name;
     private Double price;
     private Long quantity;

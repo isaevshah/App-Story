@@ -1,14 +1,12 @@
 package kz.app.appstore.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kz.app.appstore.dto.catalog.CreateCatalogRequest;
-import kz.app.appstore.dto.catalog.CatalogResponse;
-import kz.app.appstore.dto.catalog.CreateProductRequest;
-import kz.app.appstore.dto.catalog.ProductResponseDTO;
+import kz.app.appstore.dto.catalog.*;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +55,23 @@ public class ManagerController {
             return ResponseEntity.status(HttpStatus.CREATED).body(product);
         } catch (ProductCreationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/all-products/get")
+    public ResponseEntity<?> getProductsByCatalogId(
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String sortDir
+    ) {
+        try {
+            Page<ProductResponse> products = productService.getAllProducts(page, size, sortBy, sortDir);
+            return ResponseEntity.ok(products);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
     }
 }

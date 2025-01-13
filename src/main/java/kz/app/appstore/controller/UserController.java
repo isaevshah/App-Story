@@ -5,6 +5,7 @@ import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.catalog.ProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.service.ProductService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
+@Slf4j
 @PreAuthorize(value = "hasAnyRole('MANAGER', 'ADMIN', 'CUSTOMER')")
 public class UserController {
     private final ProductService productService;
@@ -43,6 +45,7 @@ public class UserController {
         }
     }
 
+
     @GetMapping("/catalogs/get")
     public List<CatalogResponse> getAllCatalogs() throws JsonProcessingException {
         return productService.getAllCatalogs();
@@ -58,6 +61,11 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
+    }
+
+    @PostMapping("/cart/cart-item/create")
+    public void createCartItem(@PathVariable Long productId){
+        log.info("Got productId {}", productId);
     }
 
     @GetMapping("/liked-products/get")
