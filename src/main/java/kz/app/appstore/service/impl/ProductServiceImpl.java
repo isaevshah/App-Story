@@ -12,10 +12,12 @@ import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -102,6 +104,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @Retryable(value = DataIntegrityViolationException.class, maxAttempts = 5)
     public ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request) throws ProductCreationException {
         try {
             validateInput(request);
@@ -112,6 +115,10 @@ public class ProductServiceImpl implements ProductService {
             product.setPrice(request.getPrice());
             product.setQuantity(request.getQuantity());
             product.setCatalog(catalog);
+
+            // Генерация и установка уникального кода
+            String individualCode = generateUniqueCode();
+            product.setIndividualCode(individualCode);
 
             handleSpecificParams(product, request.getSpecificParams());
             List<ProductImage> productImages = handleImages(request.getImages(), product);
@@ -234,6 +241,7 @@ public class ProductServiceImpl implements ProductService {
         return new ProductResponse(
                 product.getId(),
                 product.getCatalog().getName(),
+                product.getIndividualCode(),
                 product.getName(),
                 product.getPrice(),
                 product.getQuantity(),
@@ -260,5 +268,9 @@ public class ProductServiceImpl implements ProductService {
                 catalog.getDescription(),
                 parentCatalogResponse
         );
+    }
+
+    private String generateUniqueCode() {
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 }

@@ -21,6 +21,8 @@ public class Product {
     private Double price;
     private Long quantity;
     private String description;
+    @Column(unique = true)
+    private String individualCode;
     private Boolean liked = false;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
