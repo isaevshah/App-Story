@@ -1,5 +1,6 @@
 package kz.app.appstore.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kz.app.appstore.dto.catalog.*;
 import kz.app.appstore.dto.error.ErrorResponse;
@@ -27,10 +28,10 @@ public class ManagerController {
     }
 
     @PostMapping("/catalogs/create")
-    public ResponseEntity<CatalogResponse> createCatalog(@RequestBody CreateCatalogRequest request) {
-        log.info("Got createCatalog request {}", objectMapper.valueToTree(request));
+    public ResponseEntity<CatalogResponse> createCatalog(@RequestBody CreateCatalogRequest request) throws JsonProcessingException {
+        log.info("Got createCatalog request {}", objectMapper.writeValueAsString(request));
         CatalogResponse catalogResponse = productService.createCatalog(request);
-        log.info("Got createCatalog response {}", objectMapper.valueToTree(catalogResponse));
+        log.info("Got createCatalog response {}", objectMapper.writeValueAsString(catalogResponse));
         return ResponseEntity.ok(catalogResponse);
     }
 
@@ -49,9 +50,10 @@ public class ManagerController {
     public ResponseEntity<?> createProduct(
             @PathVariable Long catalogId,
             @ModelAttribute CreateProductRequest request
-    ) {
+    ) throws JsonProcessingException {
         try {
             ProductResponseDTO product = productService.createProduct(catalogId, request);
+            log.info("Got createProduct response {}", objectMapper.writeValueAsString(product));
             return ResponseEntity.status(HttpStatus.CREATED).body(product);
         } catch (ProductCreationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(e.getMessage()));

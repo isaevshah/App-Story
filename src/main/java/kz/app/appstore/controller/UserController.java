@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.catalog.ProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
+import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -22,9 +23,11 @@ import java.util.List;
 @PreAuthorize(value = "hasAnyRole('MANAGER', 'ADMIN', 'CUSTOMER')")
 public class UserController {
     private final ProductService productService;
+    private final CartService cartService;
 
-    public UserController(ProductService productService) {
+    public UserController(ProductService productService, CartService cartService) {
         this.productService = productService;
+        this.cartService = cartService;
     }
 
     @GetMapping("/catalogs/{catalogId}/products")
@@ -63,9 +66,12 @@ public class UserController {
         }
     }
 
-    @PostMapping("/cart/cart-item/create")
-    public void createCartItem(@PathVariable Long productId){
+    @PostMapping("/cart/cart-item/{productId}/{quantity}/create")
+    public void createCartItem(@PathVariable Long productId, @PathVariable Long quantity){
         log.info("Got productId {}", productId);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        cartService.addToCart(productId,username, quantity);
     }
 
     @GetMapping("/liked-products/get")
