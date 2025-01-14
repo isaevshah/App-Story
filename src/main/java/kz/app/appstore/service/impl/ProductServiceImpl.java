@@ -270,7 +270,18 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
+//    private String generateUniqueCode() {
+//        return UUID.randomUUID().toString().substring(0, 8);
+//    }
+
     private String generateUniqueCode() {
-        return UUID.randomUUID().toString().substring(0, 8);
+        long timestamp = System.currentTimeMillis();
+        Random random = new Random();
+        String timestampStr = Long.toString(timestamp);
+        StringBuilder code = new StringBuilder(timestampStr.substring(timestampStr.length() - 8));
+        while (code.length() < 8) {
+            code.append(random.nextInt(10));
+        }
+        return code.toString();
     }
 }
