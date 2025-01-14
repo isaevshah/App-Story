@@ -1,6 +1,7 @@
 package kz.app.appstore.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,6 @@ public class CartItem {
     @MapsId("productId")
     @JoinColumn(name = "product_id")
     private Product product;
-    private Integer quantity;
+    private int quantity;
     private Double price;
 }

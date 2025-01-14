@@ -67,7 +67,7 @@ public class UserController {
     }
 
     @PostMapping("/cart/cart-item/{productId}/{quantity}/create")
-    public void createCartItem(@PathVariable Long productId, @PathVariable Long quantity){
+    public void createCartItem(@PathVariable Long productId, @PathVariable int quantity){
         log.info("Got productId {}", productId);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
