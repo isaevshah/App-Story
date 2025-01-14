@@ -1,63 +1,55 @@
 package kz.app.appstore.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import kz.app.appstore.dto.cart.CartItemResponse;
 import kz.app.appstore.entity.*;
-import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.repository.CartItemRepository;
 import kz.app.appstore.repository.CartRepository;
 import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.CartService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@Transactional
+@SuppressWarnings("unchecked")
 public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final ObjectMapper objectMapper;
 
     public CartServiceImpl(UserRepository userRepository, ProductRepository productRepository,
-                           CartRepository cartRepository, CartItemRepository cartItemRepository) {
+                           CartRepository cartRepository, CartItemRepository cartItemRepository, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
+    @Transactional
     public void addToCart(Long productId, String username, int quantity) {
-        try {
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
-
-            Cart cart = getOrCreateCart(user);
-
-            if (!checkProductQuantity(productId, quantity)) {
-                throw new InsufficientStockException("Insufficient stock for product: " + productId);
-            }
-
-            updateOrCreateCartItem(cart, product, quantity);
-
-            updateCartTotalPrice(cart);
-
-            log.info("Added product {} to cart for user {}", productId, username);
-        } catch (OptimisticLockingFailureException e) {
-            log.warn("Concurrent modification detected while adding to cart. Retrying operation.");
-            // Здесь можно реализовать механизм повторных попыток
-            throw new ConcurrentModificationException("Unable to update cart due to concurrent modification");
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
+        Cart cart = getOrCreateCart(user);
+        updateOrCreateCartItem(cart, product, quantity);
+        updateCartTotalPrice(cart);
+        log.info("Added product {} to cart for user {}", productId, username);
     }
 
     @Override
@@ -92,11 +84,43 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Cart getCartByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-        return user.getCart();
+    public List<CartItemResponse> getCartList(String username) {
+        Cart cart = getCartByUsername(username); // Получаем корзину пользователя
+        List<CartItem> cartItems = cart.getCartItems(); // Получаем список товаров в корзине
+
+        // Преобразуем каждый CartItem в CartItemResponse
+        return cartItems.stream().map(cartItem -> {
+            Product product = cartItem.getProduct();
+
+            // Десериализация specificParams (если это JSON-строка)
+            Map<String, Object> specificParams = new HashMap<>();
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                specificParams = objectMapper.readValue(product.getSpecificParams(), Map.class);
+            } catch (Exception e) {
+                // Логируем ошибку десериализации, если она произошла
+                e.printStackTrace();
+            }
+
+            // Получение списка URL изображений
+            List<String> imageUrls = product.getImages().stream()
+                    .map(ProductImage::getImageUrl)
+                    .collect(Collectors.toList());
+
+            // Формирование CartItemResponse
+            return new CartItemResponse(
+                    product.getIndividualCode(),
+                    product.getName(),
+                    product.getPrice(),
+                    cartItem.getPrice(), // Общая стоимость для данного товара
+                    cartItem.getQuantity(), // Общее количество
+                    product.getDescription(),
+                    specificParams,
+                    imageUrls
+            );
+        }).collect(Collectors.toList());
     }
+
 
     @Override
     public boolean checkProductQuantity(Long productId, int requestQuantity) {
@@ -121,13 +145,8 @@ public class CartServiceImpl implements CartService {
             cart.getCartItems().add(cartItem);
         }
 
-        int newQuantity = cartItem.getQuantity() + quantity;
-        if (newQuantity > product.getQuantity()) {
-            throw new InsufficientStockException("Total requested quantity exceeds available stock");
-        }
-
-        cartItem.setQuantity(newQuantity);
-        cartItem.setPrice(product.getPrice() * newQuantity);
+        cartItem.setQuantity(quantity);
+        cartItem.setPrice(product.getPrice() * quantity);
         cartItemRepository.save(cartItem);
     }
 
@@ -151,4 +170,12 @@ public class CartServiceImpl implements CartService {
         }
         return user.getCart();
     }
+
+    private Cart getCartByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        return Optional.ofNullable(user.getCart())
+                .orElseThrow(() -> new RuntimeException("Cart not found for user: " + username));
+    }
+
 }

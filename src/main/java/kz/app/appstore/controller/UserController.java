@@ -1,9 +1,13 @@
 package kz.app.appstore.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.persistence.EntityNotFoundException;
+import kz.app.appstore.dto.cart.CartItemResponse;
 import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.catalog.ProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
+import kz.app.appstore.entity.Cart;
+import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 @RestController
@@ -67,12 +72,34 @@ public class UserController {
     }
 
     @PostMapping("/cart/cart-item/{productId}/{quantity}/create")
-    public void createCartItem(@PathVariable Long productId, @PathVariable int quantity){
+    public ResponseEntity<?> createCartItem(@PathVariable Long productId, @PathVariable int quantity) {
         log.info("Got productId {}", productId);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        cartService.addToCart(productId,username, quantity);
+        try {
+            cartService.addToCart(productId, username, quantity);
+            return ResponseEntity.ok("Product added to cart successfully");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (InsufficientStockException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
+
+    @GetMapping("/cart/by-session/get")
+    public ResponseEntity<?> getCartBySession() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        List<CartItemResponse> cart = cartService.getCartList(username);
+        try {
+            return ResponseEntity.ok(cart);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
+        }
+    }
+
 
     @GetMapping("/liked-products/get")
     public ProductResponse getLikedProducts() {
