@@ -4,9 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.cart.CartItemResponse;
 import kz.app.appstore.dto.catalog.CatalogResponse;
-import kz.app.appstore.dto.catalog.ProductResponse;
+import kz.app.appstore.dto.product.ProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
-import kz.app.appstore.entity.Cart;
 import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.ProductService;
@@ -19,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ConcurrentModificationException;
 import java.util.List;
 
 @RestController

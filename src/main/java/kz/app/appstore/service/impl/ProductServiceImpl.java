@@ -4,6 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.catalog.*;
+import kz.app.appstore.dto.product.CreateProductRequest;
+import kz.app.appstore.dto.product.ProductResponse;
+import kz.app.appstore.dto.product.ProductResponseDTO;
+import kz.app.appstore.dto.product.UpdateProductRequest;
 import kz.app.appstore.entity.Catalog;
 import kz.app.appstore.entity.Product;
 import kz.app.appstore.entity.ProductImage;
@@ -250,6 +254,15 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
         return convertToProductResponse(product);
+    }
+
+    @Override
+    public void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest) {
+        Catalog catalog = catalogRepository.findById(catalogId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + catalogId));
+        catalog.setName(catalogRequest.getName());
+        catalog.setDescription(catalogRequest.getDescription());
+        catalogRepository.save(catalog);
     }
 
     private ProductResponse convertToProductResponse(Product product) {

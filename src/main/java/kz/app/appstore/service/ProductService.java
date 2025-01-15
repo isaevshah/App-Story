@@ -2,6 +2,10 @@ package kz.app.appstore.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import kz.app.appstore.dto.catalog.*;
+import kz.app.appstore.dto.product.CreateProductRequest;
+import kz.app.appstore.dto.product.ProductResponse;
+import kz.app.appstore.dto.product.ProductResponseDTO;
+import kz.app.appstore.dto.product.UpdateProductRequest;
 import kz.app.appstore.exception.ProductCreationException;
 import org.springframework.data.domain.Page;
 import java.util.List;
@@ -18,5 +22,5 @@ public interface ProductService {
     Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
     void updateProduct(Long productId, UpdateProductRequest request) throws ProductCreationException;
     ProductResponse getProductDetails(Long productId);
-
+    void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest);
 }

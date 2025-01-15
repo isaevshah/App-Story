@@ -1,4 +1,4 @@
-package kz.app.appstore.dto.catalog;
+package kz.app.appstore.dto.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

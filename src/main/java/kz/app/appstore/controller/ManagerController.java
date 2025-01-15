@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.catalog.*;
 import kz.app.appstore.dto.error.ErrorResponse;
+import kz.app.appstore.dto.product.CreateProductRequest;
+import kz.app.appstore.dto.product.ProductResponse;
+import kz.app.appstore.dto.product.ProductResponseDTO;
+import kz.app.appstore.dto.product.UpdateProductRequest;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
@@ -93,6 +97,16 @@ public class ManagerController {
         try {
             ProductResponse productResponse = productService.getProductDetails(productId);
             return ResponseEntity.ok(productResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
+        }
+    }
+
+    @PostMapping("/catalog/{catalogId}/update")
+    public ResponseEntity<?> updateCatalog(@PathVariable Long catalogId, @RequestBody CreateCatalogRequest request) {
+        try {
+            productService.updateCatalog(catalogId, request);
+            return ResponseEntity.ok("Catalog updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
