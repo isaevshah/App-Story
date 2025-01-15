@@ -8,12 +8,9 @@ import kz.app.appstore.dto.product.CreateProductRequest;
 import kz.app.appstore.dto.product.ProductResponse;
 import kz.app.appstore.dto.product.ProductResponseDTO;
 import kz.app.appstore.dto.product.UpdateProductRequest;
-import kz.app.appstore.entity.Catalog;
-import kz.app.appstore.entity.Product;
-import kz.app.appstore.entity.ProductImage;
+import kz.app.appstore.entity.*;
 import kz.app.appstore.exception.ProductCreationException;
-import kz.app.appstore.repository.CatalogRepository;
-import kz.app.appstore.repository.ProductRepository;
+import kz.app.appstore.repository.*;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,14 +37,20 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CatalogRepository catalogRepository;
+    private final CartItemRepository cartItemRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final PurchaseRequestRepository purchaseRequestRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${upload.path}")
     private String uploadPath;
 
-    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper) {
+    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, CartItemRepository cartItemRepository, OrderItemRepository orderItemRepository, PurchaseRequestRepository purchaseRequestRepository, ObjectMapper objectMapper) {
         this.productRepository = productRepository;
         this.catalogRepository = catalogRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.purchaseRequestRepository = purchaseRequestRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -263,6 +266,20 @@ public class ProductServiceImpl implements ProductService {
         catalog.setName(catalogRequest.getName());
         catalog.setDescription(catalogRequest.getDescription());
         catalogRepository.save(catalog);
+    }
+
+    @Transactional
+    @Override
+    public void deleteProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
+        // Удаление связанных записей пакетными запросами
+        cartItemRepository.deleteCartItemsByProduct(product);
+        orderItemRepository.setProductToNullInOrderItem(product);
+        purchaseRequestRepository.setProductToNullInPurchaseRequest(product);
+
+        productRepository.delete(product);
+        log.info("Deleted product: {}", productId);
     }
 
     private ProductResponse convertToProductResponse(Product product) {

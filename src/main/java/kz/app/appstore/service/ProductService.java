@@ -23,4 +23,5 @@ public interface ProductService {
     void updateProduct(Long productId, UpdateProductRequest request) throws ProductCreationException;
     ProductResponse getProductDetails(Long productId);
     void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest);
+    void deleteProduct(Long productId);
 }

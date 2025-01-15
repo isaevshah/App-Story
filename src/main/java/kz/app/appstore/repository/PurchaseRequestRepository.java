@@ -1,15 +1,15 @@
 package kz.app.appstore.repository;
 
-import kz.app.appstore.entity.CartItem;
-import kz.app.appstore.entity.CartItemKey;
 import kz.app.appstore.entity.Product;
+import kz.app.appstore.entity.PurchaseRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface CartItemRepository extends JpaRepository<CartItem, CartItemKey> {
+public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest, Long> {
     @Modifying
-    @Query("DELETE FROM CartItem c WHERE c.product = :product")
-    void deleteCartItemsByProduct(@Param("product") Product product);
+    @Query("UPDATE PurchaseRequest p SET p.product = null WHERE p.product = :product")
+    void setProductToNullInPurchaseRequest(@Param("product") Product product);
+
 }
