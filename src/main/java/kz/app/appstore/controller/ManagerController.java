@@ -102,7 +102,7 @@ public class ManagerController {
         }
     }
 
-    @PostMapping("/catalog/{catalogId}/update")
+    @PutMapping("/catalog/{catalogId}/update")
     public ResponseEntity<?> updateCatalog(@PathVariable Long catalogId, @RequestBody CreateCatalogRequest request) {
         try {
             productService.updateCatalog(catalogId, request);
