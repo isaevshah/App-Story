@@ -1,8 +1,10 @@
 package kz.app.appstore.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import kz.app.appstore.dto.admin.AdminUserCreationDTO;
 import kz.app.appstore.dto.admin.EmployeesDto;
+import kz.app.appstore.entity.Catalog;
 import kz.app.appstore.entity.Profile;
 import kz.app.appstore.entity.User;
 import kz.app.appstore.enums.Role;
@@ -67,6 +69,26 @@ public class AdminServiceImpl implements AdminService {
         } catch (Exception e) {
             log.error("Error deleting user", e);
         }
+    }
+
+    @Override
+    public void updateEmployee(Long userId, AdminUserCreationDTO userRegistrationDTO) {
+        User employee = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + userId));
+        employee.setUsername(userRegistrationDTO.getUsername());
+        employee.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
+        employee.setRole(userRegistrationDTO.getIsManager() ? Role.MANAGER : Role.WAREHOUSE_WORKER);
+        employee.setUserType(UserType.PHYSICAL);
+        employee.setActive(true);
+
+        Profile profile = employee.getProfile();
+        profile.setPhoneNumber(userRegistrationDTO.getPhoneNumber());
+        profile.setFirstName(userRegistrationDTO.getFirstName());
+        profile.setLastName(userRegistrationDTO.getLastName());
+        profile.setUser(employee);
+
+        employee.setProfile(profile);
+        userRepository.save(employee);
     }
 
     @Override
