@@ -46,7 +46,7 @@ public class ManagerController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/catalogs/{catalogId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/catalogs/{catalogId}/product-create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @PathVariable Long catalogId,
             @ModelAttribute CreateProductRequest request
