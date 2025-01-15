@@ -11,16 +11,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    @Query("SELECT p FROM Product p WHERE p.catalog = :catalog")
-    Page<Product> findByCatalog(@Param("catalog") Catalog catalog, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.catalog.id = :catalogId")
     Page<Product> findByCatalogId(@Param("catalogId") Long catalogId, Pageable pageable);
 
     @Query("SELECT p FROM Product p")
     Page<Product> getAllProducts(Pageable pageable);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Product p WHERE p.id = :productId")
-    Product lockProductForUpdate(@Param("productId") Long productId);
 }

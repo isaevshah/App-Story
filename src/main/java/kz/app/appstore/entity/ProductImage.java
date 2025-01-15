@@ -17,4 +17,14 @@ public class ProductImage {
     private String imageUrl;
     @ManyToOne
     private Product product;
+
+    public void setProduct(Product product) {
+        if (this.product != null) {
+            this.product.getImages().remove(this);
+        }
+        this.product = product;
+        if (product != null) {
+            product.getImages().add(this);
+        }
+    }
 }

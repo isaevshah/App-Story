@@ -13,7 +13,7 @@ spring:
       ddl-auto: update
   servlet:
     multipart:
-      max-file-size: 1MB
+      max-file-size: 3MB
 upload:
   path: /Users/shahruhisaev/Documents/appstoryimages
 jwt:

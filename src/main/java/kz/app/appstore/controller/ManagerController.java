@@ -2,6 +2,7 @@ package kz.app.appstore.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.catalog.*;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.exception.ProductCreationException;
@@ -72,6 +73,26 @@ public class ManagerController {
             return ResponseEntity.ok(products);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
+        }
+    }
+
+    @PostMapping("/product/{productId}/update")
+    public ResponseEntity<?> updateProduct(@PathVariable Long productId, @ModelAttribute UpdateProductRequest request) {
+        try {
+            productService.updateProduct(productId, request);
+            return ResponseEntity.ok("Product updated successfully");
+        } catch (EntityNotFoundException | ProductCreationException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+        }
+    }
+
+    @GetMapping("/product-details/{productId}/get")
+    public ResponseEntity<?> getProductDetailsByProductId(@PathVariable Long productId) {
+        try {
+            ProductResponse productResponse = productService.getProductDetails(productId);
+            return ResponseEntity.ok(productResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }

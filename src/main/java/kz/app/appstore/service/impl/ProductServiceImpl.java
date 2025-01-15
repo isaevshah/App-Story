@@ -2,6 +2,7 @@ package kz.app.appstore.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.catalog.*;
 import kz.app.appstore.entity.Catalog;
 import kz.app.appstore.entity.Product;
@@ -225,6 +226,31 @@ public class ProductServiceImpl implements ProductService {
         return products.map(this::convertToProductResponse);
     }
 
+    @Override
+    public void updateProduct(Long productId, UpdateProductRequest request) throws ProductCreationException {
+        try {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
+
+            product.setName(request.getName());
+            product.setPrice(request.getPrice());
+            product.setQuantity(request.getQuantity());
+
+            handleSpecificParams(product, request.getSpecificParams());
+            updateProductImages(product, request.getImages());
+
+            productRepository.save(product);
+        } catch (IOException e) {
+            throw new ProductCreationException("Ошибка при обработке изображений товара", e);
+        }
+    }
+
+    @Override
+    public ProductResponse getProductDetails(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
+        return convertToProductResponse(product);
+    }
 
     private ProductResponse convertToProductResponse(Product product) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -252,7 +278,6 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
-
     public CatalogResponse toCatalogResponse(Catalog catalog) {
         ParentCatalogResponse parentCatalogResponse = null;
         if (catalog.getParentCatalog() != null) {
@@ -270,10 +295,6 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
-//    private String generateUniqueCode() {
-//        return UUID.randomUUID().toString().substring(0, 8);
-//    }
-
     private String generateUniqueCode() {
         long timestamp = System.currentTimeMillis();
         Random random = new Random();
@@ -283,5 +304,25 @@ public class ProductServiceImpl implements ProductService {
             code.append(random.nextInt(10));
         }
         return code.toString();
+    }
+
+    private void updateProductImages(Product product, MultipartFile[] newImageFiles) throws IOException {
+        List<ProductImage> imagesToRemove = new ArrayList<>(product.getImages());
+        if (newImageFiles != null) {
+            for (MultipartFile image : newImageFiles) {
+                if (!image.isEmpty()) {
+                    String fileName = saveImageFile(image);
+                    ProductImage productImage = new ProductImage();
+                    productImage.setImageUrl("/images/" + fileName);
+                    productImage.setProduct(product);
+                    product.getImages().add(productImage);
+                }
+            }
+        }
+        // Удаляем старые изображения, которых нет в новом наборе
+        product.getImages().removeAll(imagesToRemove);
+        for (ProductImage imageToRemove : imagesToRemove) {
+            imageToRemove.setProduct(null);
+        }
     }
 }
