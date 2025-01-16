@@ -43,7 +43,7 @@ public class AdminController {
         return adminService.getAllEmployees();
     }
 
-    @PostMapping("/employee/{userId}/update")
+    @PutMapping("/employee/{userId}/update")
     public ResponseEntity<?> updateCatalog(@PathVariable Long userId, @RequestBody AdminUserCreationDTO request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
