@@ -76,7 +76,7 @@ public class ManagerController {
     @GetMapping("/all-products/get")
     public ResponseEntity<?> getProductsByCatalogId(
             @RequestParam(defaultValue = "0", required = false) int page,
-            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "50", required = false) int size,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
             @RequestParam(defaultValue = "asc", required = false) String sortDir
     ) {
