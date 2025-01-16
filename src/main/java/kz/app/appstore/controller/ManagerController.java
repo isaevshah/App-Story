@@ -125,8 +125,8 @@ public class ManagerController {
     }
 
     @DeleteMapping("/delete-product/{productId}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
+        productService.deleteProduct(productId);
         return ResponseEntity.ok("Product successfully deleted");
     }
 
