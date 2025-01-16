@@ -117,4 +117,5 @@ public class ManagerController {
         productService.deleteProduct(id);
         return ResponseEntity.ok("Product successfully deleted");
     }
+
 }

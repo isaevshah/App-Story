@@ -1,7 +1,6 @@
 package kz.app.appstore.service;
 
 import kz.app.appstore.dto.cart.CartItemResponse;
-import kz.app.appstore.entity.Cart;
 
 import java.util.List;
 

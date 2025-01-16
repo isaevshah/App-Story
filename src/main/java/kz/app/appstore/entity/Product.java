@@ -24,6 +24,7 @@ public class Product {
     @Column(unique = true)
     private String individualCode;
     private Boolean liked = false;
+    private Boolean isDeleted = false;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
     @Column(columnDefinition = "text")

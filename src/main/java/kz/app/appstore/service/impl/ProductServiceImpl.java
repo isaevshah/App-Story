@@ -37,20 +37,14 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CatalogRepository catalogRepository;
-    private final CartItemRepository cartItemRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final PurchaseRequestRepository purchaseRequestRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${upload.path}")
     private String uploadPath;
 
-    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, CartItemRepository cartItemRepository, OrderItemRepository orderItemRepository, PurchaseRequestRepository purchaseRequestRepository, ObjectMapper objectMapper) {
+    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper) {
         this.productRepository = productRepository;
         this.catalogRepository = catalogRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.purchaseRequestRepository = purchaseRequestRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -79,10 +73,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteCatalog(Long id) {
-        Catalog catalog = catalogRepository.findById(id).orElse(null);
-        if (catalog != null) {
-            catalogRepository.delete(catalog);
-        }
+        catalogRepository.findById(id).ifPresent(catalogRepository::delete);
     }
 
     @Override
@@ -268,18 +259,13 @@ public class ProductServiceImpl implements ProductService {
         catalogRepository.save(catalog);
     }
 
-    @Transactional
     @Override
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
-        // Удаление связанных записей пакетными запросами
-        cartItemRepository.deleteCartItemsByProduct(product);
-        orderItemRepository.setProductToNullInOrderItem(product);
-        purchaseRequestRepository.setProductToNullInPurchaseRequest(product);
-
-        productRepository.delete(product);
-        log.info("Deleted product: {}", productId);
+        product.setIsDeleted(true);
+        productRepository.save(product);
+        log.info("Product marked as deleted: {}", productId);
     }
 
     private ProductResponse convertToProductResponse(Product product) {
@@ -304,7 +290,8 @@ public class ProductServiceImpl implements ProductService {
                 product.getDescription(),
                 product.getLiked(),
                 specificParams,
-                imageUrls
+                imageUrls,
+                product.getIsDeleted()
         );
     }
 

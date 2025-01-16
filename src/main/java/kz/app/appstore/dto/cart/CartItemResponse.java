@@ -19,4 +19,5 @@ public class CartItemResponse {
     private String description;
     private Map<String, Object> specificParams;
     private List<String> imageUrls;
+    private Boolean isDeleted;
 }

@@ -116,7 +116,8 @@ public class CartServiceImpl implements CartService {
                     cartItem.getQuantity(), // Общее количество
                     product.getDescription(),
                     specificParams,
-                    imageUrls
+                    imageUrls,
+                    product.getIsDeleted()
             );
         }).collect(Collectors.toList());
     }

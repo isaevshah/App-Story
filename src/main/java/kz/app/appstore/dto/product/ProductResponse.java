@@ -21,4 +21,5 @@ public class ProductResponse {
     private Boolean liked;
     private Map<String, Object> specificParams;
     private List<String> imageUrls;
+    private Boolean isDeleted;
 }
