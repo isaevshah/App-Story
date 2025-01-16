@@ -90,7 +90,7 @@ public class ManagerController {
         }
     }
 
-    @PostMapping("/product/{productId}/update")
+    @PutMapping("/product/{productId}/update")
     public ResponseEntity<?> updateProduct(@PathVariable Long productId, @ModelAttribute UpdateProductRequest request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
