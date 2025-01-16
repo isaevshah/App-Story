@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,23 +31,25 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void createManager(AdminUserCreationDTO userCreationDTO) {
+    public void createManager(AdminUserCreationDTO userCreationDTO, String adminUsername) {
         if (userRepository.existsByUsername(userCreationDTO.getUsername())) {
             throw new ValidationException("Username already exists");
         }
 
-        User user = buildUserFromDTO(userCreationDTO);
+        User user = buildUserFromDTO(userCreationDTO, adminUsername);
 
         userRepository.save(user);
         log.info("Created user with username: {}", user.getUsername());
     }
 
-    private User buildUserFromDTO(AdminUserCreationDTO userCreationDTO) {
+    private User buildUserFromDTO(AdminUserCreationDTO userCreationDTO, String adminUsername) {
         User user = new User();
         user.setUsername(userCreationDTO.getUsername());
         user.setPassword(passwordEncoder.encode(userCreationDTO.getPassword()));
         user.setRole(userCreationDTO.getIsManager() ? Role.MANAGER : Role.WAREHOUSE_WORKER);
         user.setUserType(UserType.PHYSICAL);
+        user.setRegistrationAt(LocalDateTime.now());
+        user.setCreatedBy(adminUsername);
         user.setActive(true);
 
         Profile profile = new Profile();
@@ -72,7 +75,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void updateEmployee(Long userId, AdminUserCreationDTO userRegistrationDTO) {
+    public void updateEmployee(Long userId, AdminUserCreationDTO userRegistrationDTO, String adminUsername) {
         User employee = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found: " + userId));
         employee.setUsername(userRegistrationDTO.getUsername());
@@ -80,6 +83,9 @@ public class AdminServiceImpl implements AdminService {
         employee.setRole(userRegistrationDTO.getIsManager() ? Role.MANAGER : Role.WAREHOUSE_WORKER);
         employee.setUserType(UserType.PHYSICAL);
         employee.setActive(true);
+        employee.setUpdatedAt(LocalDateTime.now());
+        employee.setUpdatedBy(adminUsername);
+
 
         Profile profile = employee.getProfile();
         profile.setPhoneNumber(userRegistrationDTO.getPhoneNumber());

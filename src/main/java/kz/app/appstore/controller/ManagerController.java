@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,15 +36,19 @@ public class ManagerController {
 
     @PostMapping("/catalogs/create")
     public ResponseEntity<CatalogResponse> createCatalog(@RequestBody CreateCatalogRequest request) throws JsonProcessingException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
         log.info("Got createCatalog request {}", objectMapper.writeValueAsString(request));
-        CatalogResponse catalogResponse = productService.createCatalog(request);
+        CatalogResponse catalogResponse = productService.createCatalog(request, username);
         log.info("Got createCatalog response {}", objectMapper.writeValueAsString(catalogResponse));
         return ResponseEntity.ok(catalogResponse);
     }
 
     @PostMapping("/under-catalogs/{parentCatalogId}/create")
     public ResponseEntity<CatalogResponse> createUnderCatalog(@PathVariable Long parentCatalogId, @RequestBody CreateCatalogRequest request) {
-        return ResponseEntity.ok(productService.createUnderCatalog(parentCatalogId, request));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return ResponseEntity.ok(productService.createUnderCatalog(parentCatalogId, request, username));
     }
 
     @DeleteMapping("/catalogs/{catalogId}/delete")
@@ -57,7 +63,9 @@ public class ManagerController {
             @ModelAttribute CreateProductRequest request
     ) throws JsonProcessingException {
         try {
-            ProductResponseDTO product = productService.createProduct(catalogId, request);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String username = auth.getName();
+            ProductResponseDTO product = productService.createProduct(catalogId, request, username);
             log.info("Got createProduct response {}", objectMapper.writeValueAsString(product));
             return ResponseEntity.status(HttpStatus.CREATED).body(product);
         } catch (ProductCreationException e) {
@@ -85,7 +93,9 @@ public class ManagerController {
     @PostMapping("/product/{productId}/update")
     public ResponseEntity<?> updateProduct(@PathVariable Long productId, @ModelAttribute UpdateProductRequest request) {
         try {
-            productService.updateProduct(productId, request);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String username = auth.getName();
+            productService.updateProduct(productId, request, username);
             return ResponseEntity.ok("Product updated successfully");
         } catch (EntityNotFoundException | ProductCreationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
@@ -105,7 +115,9 @@ public class ManagerController {
     @PutMapping("/catalog/{catalogId}/update")
     public ResponseEntity<?> updateCatalog(@PathVariable Long catalogId, @RequestBody CreateCatalogRequest request) {
         try {
-            productService.updateCatalog(catalogId, request);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String username = auth.getName();
+            productService.updateCatalog(catalogId, request, username);
             return ResponseEntity.ok("Catalog updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));

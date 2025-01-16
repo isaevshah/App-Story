@@ -11,17 +11,17 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface ProductService {
-    CatalogResponse createCatalog(CreateCatalogRequest catalogRequest);
-    CatalogResponse createUnderCatalog(Long id, CreateCatalogRequest catalogRequest);
+    CatalogResponse createCatalog(CreateCatalogRequest catalogRequest, String username);
+    CatalogResponse createUnderCatalog(Long id, CreateCatalogRequest catalogRequest, String username);
     void deleteCatalog(Long id);
     List<CatalogResponse> getAllCatalogs() throws JsonProcessingException;
     List<CatalogResponse> getAllCatalogsByParentId(Long parentCatalogId) throws JsonProcessingException;
-    ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request) throws ProductCreationException;
+    ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request, String username) throws ProductCreationException;
     Page<ProductResponse> getProductsByCatalogId(Long catalogId, int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
     List<ProductResponse> getLikedProducts();
     Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
-    void updateProduct(Long productId, UpdateProductRequest request) throws ProductCreationException;
+    void updateProduct(Long productId, UpdateProductRequest request, String username) throws ProductCreationException;
     ProductResponse getProductDetails(Long productId);
-    void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest);
+    void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest, String username);
     void deleteProduct(Long productId);
 }

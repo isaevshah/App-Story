@@ -12,6 +12,7 @@ import kz.app.appstore.entity.*;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.repository.*;
 import kz.app.appstore.service.ProductService;
+import kz.app.appstore.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,30 +40,36 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CatalogRepository catalogRepository;
     private final ObjectMapper objectMapper;
+    private final UserService userService;
 
     @Value("${upload.path}")
     private String uploadPath;
 
-    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper) {
+    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper, UserService userService) {
         this.productRepository = productRepository;
         this.catalogRepository = catalogRepository;
         this.objectMapper = objectMapper;
+        this.userService = userService;
     }
 
     @Override
-    public CatalogResponse createCatalog(CreateCatalogRequest catalogRequest) {
+    public CatalogResponse createCatalog(CreateCatalogRequest catalogRequest, String username) {
         Catalog catalog = new Catalog();
         catalog.setName(catalogRequest.getName());
         catalog.setDescription(catalogRequest.getDescription());
+        catalog.setCreatedAt(LocalDateTime.now());
+        catalog.setCreatedBy(username);
         Catalog savedCatalog = catalogRepository.save(catalog);
         return toCatalogResponse(savedCatalog);
     }
 
     @Override
-    public CatalogResponse createUnderCatalog(Long parentCatalogId, CreateCatalogRequest catalogRequest) {
+    public CatalogResponse createUnderCatalog(Long parentCatalogId, CreateCatalogRequest catalogRequest, String username) {
         Catalog catalog = new Catalog();
         catalog.setName(catalogRequest.getName());
         catalog.setDescription(catalogRequest.getDescription());
+        catalog.setCreatedBy(username);
+        catalog.setCreatedAt(LocalDateTime.now());
         if (parentCatalogId != null) {
             Catalog parent = catalogRepository.findById(parentCatalogId)
                     .orElseThrow(() -> new RuntimeException("Родительский каталог не найден"));
@@ -104,7 +112,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @Retryable(value = DataIntegrityViolationException.class, maxAttempts = 5)
-    public ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request) throws ProductCreationException {
+    public ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request, String username) throws ProductCreationException {
         try {
             validateInput(request);
             Catalog catalog = catalogRepository.findById(catalogId)
@@ -114,6 +122,8 @@ public class ProductServiceImpl implements ProductService {
             product.setPrice(request.getPrice());
             product.setQuantity(request.getQuantity());
             product.setCatalog(catalog);
+            product.setCreatedBy(username);
+            product.setCreatedAt(LocalDateTime.now());
 
             // Генерация и установка уникального кода
             String individualCode = generateUniqueCode();
@@ -225,7 +235,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateProduct(Long productId, UpdateProductRequest request) throws ProductCreationException {
+    public void updateProduct(Long productId, UpdateProductRequest request, String username) throws ProductCreationException {
         try {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
@@ -233,6 +243,8 @@ public class ProductServiceImpl implements ProductService {
             product.setName(request.getName());
             product.setPrice(request.getPrice());
             product.setQuantity(request.getQuantity());
+            product.setUpdatedBy(username);
+            product.setUpdatedAt(LocalDateTime.now());
 
             handleSpecificParams(product, request.getSpecificParams());
             updateProductImages(product, request.getImages());
@@ -251,11 +263,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest) {
+    public void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest, String username) {
         Catalog catalog = catalogRepository.findById(catalogId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found: " + catalogId));
         catalog.setName(catalogRequest.getName());
         catalog.setDescription(catalogRequest.getDescription());
+        catalog.setUpdatedBy(username);
+        catalog.setUpdatedAt(LocalDateTime.now());
         catalogRepository.save(catalog);
     }
 

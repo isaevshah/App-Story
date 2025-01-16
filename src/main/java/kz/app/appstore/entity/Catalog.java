@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -20,6 +21,10 @@ public class Catalog {
     private Long id;
     private String name;
     private String description;
+    private String createdBy;
+    private String updatedBy;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     @ManyToOne
     @JoinColumn(name = "parent_id")
     @JsonBackReference

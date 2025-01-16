@@ -8,6 +8,8 @@ import kz.app.appstore.service.AdminService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +26,9 @@ public class AdminController {
 
     @PostMapping("/create-employee")
     public ResponseEntity<Void> createManager(@Valid @RequestBody AdminUserCreationDTO userRegistrationDTO){
-        adminService.createManager(userRegistrationDTO);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String adminUsername = auth.getName();
+        adminService.createManager(userRegistrationDTO, adminUsername);
         return ResponseEntity.ok().build();
     }
 
@@ -42,7 +46,9 @@ public class AdminController {
     @PostMapping("/employee/{userId}/update")
     public ResponseEntity<?> updateCatalog(@PathVariable Long userId, @RequestBody AdminUserCreationDTO request) {
         try {
-            adminService.updateEmployee(userId, request);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String adminUsername = auth.getName();
+            adminService.updateEmployee(userId, request, adminUsername);
             return ResponseEntity.ok("Employee updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
