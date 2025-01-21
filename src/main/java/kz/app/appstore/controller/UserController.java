@@ -10,14 +10,19 @@ import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -31,6 +36,23 @@ public class UserController {
     public UserController(ProductService productService, CartService cartService) {
         this.productService = productService;
         this.cartService = cartService;
+    }
+
+    @GetMapping("/all-products/get")
+    public ResponseEntity<?> getProductsByCatalogId(
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "50", required = false) int size,
+            @RequestParam(defaultValue = "id", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String sortDir
+    ) {
+        try {
+            Page<ProductResponse> products = productService.getAllProducts(page, size, sortBy, sortDir);
+            return ResponseEntity.ok(products);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
+        }
     }
 
     @GetMapping("/catalogs/{catalogId}/products")
@@ -51,6 +73,22 @@ public class UserController {
         }
     }
 
+    @GetMapping("/images/{fileName}")
+    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) {
+        try {
+            Path filePath = Paths.get("/data/uploads").resolve(fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() && resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(resource);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     @GetMapping("/catalogs/get")
     public List<CatalogResponse> getAllCatalogs() throws JsonProcessingException {

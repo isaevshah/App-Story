@@ -53,37 +53,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void removeFromCart(Long productId, String username, int quantity) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
-        Cart cart = user.getCart();
-        if (cart == null) {
-            throw new EntityNotFoundException("Cart not found for user: " + username);
-        }
-
-        CartItemKey cartItemKey = new CartItemKey(cart.getId(), productId);
-        cartItemRepository.findById(cartItemKey).ifPresent(cartItem -> {
-            cart.getCartItems().remove(cartItem);
-            cartItemRepository.delete(cartItem);
-            updateCartTotalPrice(cart);
-        });
-    }
-
-    @Override
-    public void clearCart(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
-        Cart cart = user.getCart();
-        if (cart != null) {
-            cart.getCartItems().clear();
-            cart.setTotalPrice(0.0);
-            cartRepository.save(cart);
-        }
-    }
-
-    @Override
     public List<CartItemResponse> getCartList(String username) {
         Cart cart = getCartByUsername(username); // Получаем корзину пользователя
         List<CartItem> cartItems = cart.getCartItems(); // Получаем список товаров в корзине
@@ -120,14 +89,6 @@ public class CartServiceImpl implements CartService {
                     product.getIsDeleted()
             );
         }).collect(Collectors.toList());
-    }
-
-
-    @Override
-    public boolean checkProductQuantity(Long productId, int requestQuantity) {
-        return productRepository.findById(productId)
-                .map(product -> product.getQuantity() >= requestQuantity)
-                .orElse(false);
     }
 
     private void updateOrCreateCartItem(Cart cart, Product product, int quantity) {

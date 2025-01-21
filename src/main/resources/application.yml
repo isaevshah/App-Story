@@ -15,7 +15,7 @@ spring:
     multipart:
       max-file-size: 3MB
 upload:
-  path: /data/uploads #/Users/shahruhisaev/Documents/appstoryimages
+  path: /data/uploads #/Users/shahruhisaev/Documents/appstoryimages #
 jwt:
   accessTokenExpiration: '3600000'
   refreshTokenExpiration: '604800000'

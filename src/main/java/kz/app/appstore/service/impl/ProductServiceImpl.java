@@ -170,7 +170,7 @@ public class ProductServiceImpl implements ProductService {
                 if (!image.isEmpty()) {
                     String fileName = saveImageFile(image);
                     ProductImage productImage = new ProductImage();
-                    productImage.setImageUrl("/images/" + fileName);
+                    productImage.setImageUrl(fileName);
                     productImages.add(productImage);
                     productImage.setProduct(product);
                 }
@@ -291,7 +291,7 @@ public class ProductServiceImpl implements ProductService {
             log.error("Ошибка при разборе JSON для specificParams у продукта с ID: {}", product.getId(), e);
         }
         List<String> imageUrls = product.getImages().stream()
-                .map(ProductImage::getImageUrl)
+                .map(ProductImage::getImageUrl) // Генерация полного URL
                 .collect(Collectors.toList());
 
         return new ProductResponse(
@@ -344,7 +344,7 @@ public class ProductServiceImpl implements ProductService {
                 if (!image.isEmpty()) {
                     String fileName = saveImageFile(image);
                     ProductImage productImage = new ProductImage();
-                    productImage.setImageUrl("/images/" + fileName);
+                    productImage.setImageUrl(fileName);
                     productImage.setProduct(product);
                     product.getImages().add(productImage);
                 }
