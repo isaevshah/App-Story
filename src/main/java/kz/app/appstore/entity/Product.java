@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "product") // Avoid using reserved keywords
+@Table(name = "product")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,14 +19,21 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String description;
     private Double price;
-    private String category;
-    private Integer quantity;
-    private String imageUrl;
-    private String brand;
-    private Double rating;
-    private String qrCode; // QR-код для товара
+    private Long quantity;
+    private String description;
+    @Column(unique = true)
+    private String individualCode;
+    private Boolean liked = false;
+    private Boolean isDeleted = false;
+    private String createdBy;
+    private String updatedBy;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> images = new ArrayList<>();
+    @Column(columnDefinition = "text")
+    private String specificParams;
     @ManyToOne
     @JoinColumn(name = "catalog_id", nullable = false)
     private Catalog catalog;

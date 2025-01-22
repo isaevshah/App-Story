@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,5 +22,12 @@ public class Cart {
     private User user;
     private Double totalPrice;
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems;
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    public List<CartItem> getCartItems() {
+        if (cartItems == null) {
+            cartItems = new ArrayList<>();
+        }
+        return cartItems;
+    }
 }

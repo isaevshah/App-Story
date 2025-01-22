@@ -1,16 +1,27 @@
 package kz.app.appstore.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import kz.app.appstore.dto.catalog.CreateCatalogRequest;
-import kz.app.appstore.entity.Catalog;
-import org.springframework.http.ResponseEntity;
-
+import kz.app.appstore.dto.catalog.*;
+import kz.app.appstore.dto.product.CreateProductRequest;
+import kz.app.appstore.dto.product.ProductResponse;
+import kz.app.appstore.dto.product.ProductResponseDTO;
+import kz.app.appstore.dto.product.UpdateProductRequest;
+import kz.app.appstore.exception.ProductCreationException;
+import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface ProductService {
-    Catalog createCatalog(CreateCatalogRequest catalogRequest);
-    Catalog createUnderCatalog(Long id,CreateCatalogRequest catalogRequest);
+    CatalogResponse createCatalog(CreateCatalogRequest catalogRequest, String username);
+    CatalogResponse createUnderCatalog(Long id, CreateCatalogRequest catalogRequest, String username);
     void deleteCatalog(Long id);
-    List<Catalog> getAllCatalogs() throws JsonProcessingException;
-    List<Catalog> getAllCatalogsByParentId(Long parentCatalogId) throws JsonProcessingException;
+    List<CatalogResponse> getAllCatalogs() throws JsonProcessingException;
+    List<CatalogResponse> getAllCatalogsByParentId(Long parentCatalogId) throws JsonProcessingException;
+    ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request, String username) throws ProductCreationException;
+    Page<ProductResponse> getProductsByCatalogId(Long catalogId, int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
+    List<ProductResponse> getLikedProducts();
+    Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
+    void updateProduct(Long productId, UpdateProductRequest request, String username) throws ProductCreationException;
+    ProductResponse getProductDetails(Long productId);
+    void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest, String username);
+    void deleteProduct(Long productId);
 }

@@ -9,5 +9,4 @@ public class AppStoreApplication {
     public static void main(String[] args) {
         SpringApplication.run(AppStoreApplication.class, args);
     }
-    //redeploy1
 }

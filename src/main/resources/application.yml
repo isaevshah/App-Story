@@ -11,6 +11,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 3MB
+upload:
+  path: /data/uploads #/Users/shahruhisaev/Documents/appstoryimages #
 jwt:
   accessTokenExpiration: '3600000'
   refreshTokenExpiration: '604800000'
