@@ -25,6 +25,8 @@ public class Catalog {
     private String updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @Lob
+    private byte[] image;
     @ManyToOne
     @JoinColumn(name = "parent_id")
     @JsonBackReference

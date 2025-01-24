@@ -13,6 +13,7 @@ import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.repository.*;
 import kz.app.appstore.service.ProductService;
 import kz.app.appstore.service.UserService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,6 +53,7 @@ public class ProductServiceImpl implements ProductService {
         this.userService = userService;
     }
 
+    @SneakyThrows
     @Override
     public CatalogResponse createCatalog(CreateCatalogRequest catalogRequest, String username) {
         Catalog catalog = new Catalog();
@@ -59,10 +61,16 @@ public class ProductServiceImpl implements ProductService {
         catalog.setDescription(catalogRequest.getDescription());
         catalog.setCreatedAt(LocalDateTime.now());
         catalog.setCreatedBy(username);
+
+        if (catalogRequest.getImage() != null && !catalogRequest.getImage().isEmpty()) {
+            catalog.setImage(catalogRequest.getImage().getBytes());
+        }
+
         Catalog savedCatalog = catalogRepository.save(catalog);
-        return toCatalogResponse(savedCatalog);
+        return toCatalogResponse(savedCatalog, false, false);
     }
 
+    @SneakyThrows
     @Override
     public CatalogResponse createUnderCatalog(Long parentCatalogId, CreateCatalogRequest catalogRequest, String username) {
         Catalog catalog = new Catalog();
@@ -70,13 +78,17 @@ public class ProductServiceImpl implements ProductService {
         catalog.setDescription(catalogRequest.getDescription());
         catalog.setCreatedBy(username);
         catalog.setCreatedAt(LocalDateTime.now());
+
+        if (catalogRequest.getImage() != null && !catalogRequest.getImage().isEmpty()) {
+            catalog.setImage(catalogRequest.getImage().getBytes());
+        }
         if (parentCatalogId != null) {
             Catalog parent = catalogRepository.findById(parentCatalogId)
                     .orElseThrow(() -> new RuntimeException("Родительский каталог не найден"));
             catalog.setParentCatalog(parent);
         }
         Catalog savedCatalog = catalogRepository.save(catalog);
-        return toCatalogResponse(savedCatalog);
+        return toCatalogResponse(savedCatalog, true, false);
     }
 
     @Override
@@ -87,11 +99,25 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<CatalogResponse> getAllCatalogs() throws JsonProcessingException {
         List<Catalog> catalogs = catalogRepository.findAll();
-        List<CatalogResponse> catalogResponses = catalogs.stream()
-                .map(this::toCatalogResponse)
-                .toList(); // Преобразуем сущности в DTO
-        log.info("Got all catalogs {}", objectMapper.writeValueAsString(catalogResponses));
-        return catalogResponses;
+        Map<Long, CatalogResponse> responseMap = catalogs.stream()
+                .map((Catalog catalog) -> toCatalogResponse(catalog,false, false))
+                .collect(Collectors.toMap(CatalogResponse::getId, response -> response));
+
+        List<CatalogResponse> rootCatalogs = new ArrayList<>();
+        for (Catalog catalog : catalogs) {
+            CatalogResponse response = responseMap.get(catalog.getId());
+            if (catalog.getParentCatalog() != null) {
+                CatalogResponse parentResponse = responseMap.get(catalog.getParentCatalog().getId());
+                if (parentResponse != null) {
+                    parentResponse.getSubCatalogs().add(response);
+                }
+            } else {
+                rootCatalogs.add(response);
+            }
+        }
+
+        log.info("Got all catalogs {}", objectMapper.writeValueAsString(rootCatalogs));
+        return rootCatalogs;
     }
 
     @Override
@@ -104,7 +130,7 @@ public class ProductServiceImpl implements ProductService {
         }
         List<Catalog> catalogs = catalogRepository.findByParentCatalogId(parentCatalogId);
         return catalogs.stream()
-                .map(this::toCatalogResponse)
+                .map((Catalog catalog) -> toCatalogResponse(catalog, false, true))
                 .toList();
     }
 
@@ -115,7 +141,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request, String username) throws ProductCreationException {
         try {
             if (request.getIsHotProduct() && !checkAndUpdateHotProductStatus()) {
-                throw new IllegalStateException("Максимум 30 продуктов могут быть отмечены как 'isHotProduct'.");
+                throw new IllegalStateException("Максимум 25 продуктов могут быть отмечены как 'isHotProduct'.");
             }
 
             validateInput(request);
@@ -240,10 +266,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ProductResponse> getAllHotProducts(int page, int size) throws JsonProcessingException {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> products = productRepository.getAllHotProducts(pageable);
+        return products.map(this::convertToProductResponse);
+    }
+
+    @Override
     public void updateProduct(Long productId, UpdateProductRequest request, String username) throws ProductCreationException {
         try {
             if (request.getIsHotProduct() && !checkAndUpdateHotProductStatus()) {
-                throw new IllegalStateException("Максимум 30 продуктов могут быть отмечены как 'isHotProduct'.");
+                throw new IllegalStateException("Максимум 25 продуктов могут быть отмечены как 'isHotProduct'.");
             }
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
@@ -319,22 +352,35 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
-    public CatalogResponse toCatalogResponse(Catalog catalog) {
+    public CatalogResponse toCatalogResponse(Catalog catalog, boolean includeParent, boolean includeImage) {
         ParentCatalogResponse parentCatalogResponse = null;
-        if (catalog.getParentCatalog() != null) {
+        if (includeParent && catalog.getParentCatalog() != null) {
             parentCatalogResponse = new ParentCatalogResponse(
                     catalog.getParentCatalog().getId(),
                     catalog.getParentCatalog().getName(),
                     catalog.getParentCatalog().getDescription()
             );
         }
+        String imageBase64 = null;
+        if (includeImage && catalog.getImage() != null) {
+            imageBase64 = Base64.getEncoder().encodeToString(catalog.getImage());
+        }
+        List<CatalogResponse> subCatalogResponses = catalog.getSubCatalogs() != null
+                ? catalog.getSubCatalogs().stream()
+                .map(subCatalog -> toCatalogResponse(subCatalog, false, false)) // Рекурсивный вызов
+                .collect(Collectors.toList())
+                : new ArrayList<>();
+
         return new CatalogResponse(
                 catalog.getId(),
                 catalog.getName(),
                 catalog.getDescription(),
-                parentCatalogResponse
+                parentCatalogResponse,
+                subCatalogResponses,
+                imageBase64
         );
     }
+
 
     private String generateUniqueCode() {
         long timestamp = System.currentTimeMillis();
@@ -369,6 +415,6 @@ public class ProductServiceImpl implements ProductService {
 
     private Boolean checkAndUpdateHotProductStatus() {
         long count = productRepository.countByIsHotProductTrue();
-        return count < 5;
+        return count < 25;
     }
 }

@@ -39,11 +39,10 @@ public class ManagerController {
         this.objectMapper = objectMapper;
     }
 
-    @PostMapping("/catalogs/create")
-    public ResponseEntity<CatalogResponse> createCatalog(@RequestBody CreateCatalogRequest request) throws JsonProcessingException {
+    @PostMapping(value = "/catalogs/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CatalogResponse> createCatalog(@ModelAttribute CreateCatalogRequest request) throws JsonProcessingException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        log.info("Got createCatalog request {}", objectMapper.writeValueAsString(request));
         CatalogResponse catalogResponse = productService.createCatalog(request, username);
         log.info("Got createCatalog response {}", objectMapper.writeValueAsString(catalogResponse));
         return ResponseEntity.ok(catalogResponse);
