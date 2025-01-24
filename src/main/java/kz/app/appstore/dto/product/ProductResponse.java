@@ -19,6 +19,7 @@ public class ProductResponse {
     private Long quantity;
     private String description;
     private Boolean liked;
+    private Boolean isHotProduct;
     private Map<String, Object> specificParams;
     private List<String> imageUrls;
     private Boolean isDeleted;

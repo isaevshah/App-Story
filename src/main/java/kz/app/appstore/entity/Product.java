@@ -26,6 +26,7 @@ public class Product {
     private String individualCode;
     private Boolean liked = false;
     private Boolean isDeleted = false;
+    private Boolean isHotProduct = false;
     private String createdBy;
     private String updatedBy;
     private LocalDateTime createdAt;

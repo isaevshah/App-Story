@@ -114,6 +114,10 @@ public class ProductServiceImpl implements ProductService {
     @Retryable(value = DataIntegrityViolationException.class, maxAttempts = 5)
     public ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request, String username) throws ProductCreationException {
         try {
+            if (request.getIsHotProduct() && !checkAndUpdateHotProductStatus()) {
+                throw new IllegalStateException("Максимум 30 продуктов могут быть отмечены как 'isHotProduct'.");
+            }
+
             validateInput(request);
             Catalog catalog = catalogRepository.findById(catalogId)
                     .orElseThrow(() -> new ProductCreationException("Каталог не найден"));
@@ -124,6 +128,7 @@ public class ProductServiceImpl implements ProductService {
             product.setCatalog(catalog);
             product.setCreatedBy(username);
             product.setCreatedAt(LocalDateTime.now());
+            product.setIsHotProduct(request.getIsHotProduct() != null && request.getIsHotProduct());
 
             // Генерация и установка уникального кода
             String individualCode = generateUniqueCode();
@@ -237,6 +242,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void updateProduct(Long productId, UpdateProductRequest request, String username) throws ProductCreationException {
         try {
+            if (request.getIsHotProduct() && !checkAndUpdateHotProductStatus()) {
+                throw new IllegalStateException("Максимум 30 продуктов могут быть отмечены как 'isHotProduct'.");
+            }
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
 
@@ -245,6 +253,7 @@ public class ProductServiceImpl implements ProductService {
             product.setQuantity(request.getQuantity());
             product.setUpdatedBy(username);
             product.setUpdatedAt(LocalDateTime.now());
+            product.setIsHotProduct(request.getIsHotProduct() != null && request.getIsHotProduct());
 
             handleSpecificParams(product, request.getSpecificParams());
             updateProductImages(product, request.getImages());
@@ -303,6 +312,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getQuantity(),
                 product.getDescription(),
                 product.getLiked(),
+                product.getIsHotProduct(),
                 specificParams,
                 imageUrls,
                 product.getIsDeleted()
@@ -355,5 +365,10 @@ public class ProductServiceImpl implements ProductService {
         for (ProductImage imageToRemove : imagesToRemove) {
             imageToRemove.setProduct(null);
         }
+    }
+
+    private Boolean checkAndUpdateHotProductStatus() {
+        long count = productRepository.countByIsHotProductTrue();
+        return count < 5;
     }
 }
