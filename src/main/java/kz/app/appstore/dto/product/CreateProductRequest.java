@@ -14,5 +14,6 @@ public class CreateProductRequest {
     private String description;
     private Long quantity;
     private String specificParams;
+    private Boolean isHotProduct = false;
     private MultipartFile[] images;
 }

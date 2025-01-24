@@ -13,5 +13,6 @@ public class UpdateProductRequest {
     private Double price;
     private Long quantity;
     private String specificParams;
+    private Boolean isHotProduct;
     private MultipartFile[] images;
 }
