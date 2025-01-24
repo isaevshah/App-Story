@@ -55,6 +55,20 @@ public class UserController {
         }
     }
 
+    @GetMapping("/hot-products")
+    public ResponseEntity<?> getProductsByCatalogId(
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size
+    ) {
+        try {
+            Page<ProductResponse> products = productService.getAllHotProducts(page, size);
+            return ResponseEntity.ok(products);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
+        }
+    }
     @GetMapping("/catalogs/{catalogId}/products")
     public ResponseEntity<?> getProductsByCatalogId(
             @PathVariable Long catalogId,

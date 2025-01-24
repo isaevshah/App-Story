@@ -17,4 +17,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.isHotProduct = true")
     long countByIsHotProductTrue();
+
+    @Query("SELECT p FROM Product p WHERE p.isHotProduct = true")
+    Page<Product> getAllHotProducts(Pageable pageable);
 }
