@@ -40,4 +40,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<PurchaseRequest> purchaseRequests;
     private boolean isActive;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Favorite> favorites;
 }

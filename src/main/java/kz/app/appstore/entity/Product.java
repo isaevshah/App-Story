@@ -24,7 +24,6 @@ public class Product {
     private String description;
     @Column(unique = true)
     private String individualCode;
-    private Boolean liked = false;
     private Boolean isDeleted = false;
     private Boolean isHotProduct = false;
     private String createdBy;
@@ -44,4 +43,6 @@ public class Product {
     private List<CartItem> cartItems;
     @OneToMany(mappedBy = "product")
     private List<PurchaseRequest> purchaseRequests;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Favorite> favorites;
 }

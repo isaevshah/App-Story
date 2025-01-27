@@ -344,7 +344,6 @@ public class ProductServiceImpl implements ProductService {
                 product.getPrice(),
                 product.getQuantity(),
                 product.getDescription(),
-                product.getLiked(),
                 product.getIsHotProduct(),
                 specificParams,
                 imageUrls,

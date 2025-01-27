@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.cart.CartItemResponse;
 import kz.app.appstore.dto.catalog.CatalogResponse;
+import kz.app.appstore.dto.product.FavoriteProductResponse;
 import kz.app.appstore.dto.product.ProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.service.CartService;
+import kz.app.appstore.service.FavoriteService;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -32,14 +34,16 @@ import java.util.List;
 public class UserController {
     private final ProductService productService;
     private final CartService cartService;
+    private final FavoriteService favoriteService;
 
-    public UserController(ProductService productService, CartService cartService) {
+    public UserController(ProductService productService, CartService cartService, FavoriteService favoriteService) {
         this.productService = productService;
         this.cartService = cartService;
+        this.favoriteService = favoriteService;
     }
 
     @GetMapping("/all-products/get")
-    public ResponseEntity<?> getProductsByCatalogId(
+    public ResponseEntity<?> getAllProducts(
             @RequestParam(defaultValue = "0", required = false) int page,
             @RequestParam(defaultValue = "50", required = false) int size,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
@@ -56,7 +60,7 @@ public class UserController {
     }
 
     @GetMapping("/hot-products")
-    public ResponseEntity<?> getProductsByCatalogId(
+    public ResponseEntity<?> getHotProducts(
             @RequestParam(defaultValue = "0", required = false) int page,
             @RequestParam(defaultValue = "10", required = false) int size
     ) {
@@ -150,11 +154,24 @@ public class UserController {
         }
     }
 
+    @PostMapping("/add-favorite/{productId}")
+    void addFavorite(@PathVariable Long productId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        favoriteService.addFavorite(username, productId);
+    }
 
-    @GetMapping("/liked-products/get")
-    public ProductResponse getLikedProducts() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userName = authentication.getName();
-        return new ProductResponse();
+    @GetMapping("/favorite-products")
+    public ResponseEntity<?> getFavoriteProducts() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        try {
+            FavoriteProductResponse favoriteProductResponse = favoriteService.getFavorites(username);
+            return ResponseEntity.ok(favoriteProductResponse);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
+        }
     }
 }
