@@ -27,13 +27,16 @@ public class Catalog {
     private LocalDateTime updatedAt;
     @Lob
     private byte[] image;
+
     @ManyToOne
     @JoinColumn(name = "parent_id")
     @JsonBackReference
     private Catalog parentCatalog;
+
     @OneToMany(mappedBy = "parentCatalog", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Catalog> subCatalogs;
+
     @OneToMany(mappedBy = "catalog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
 }

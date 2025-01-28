@@ -100,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
     public List<CatalogResponse> getAllCatalogs() throws JsonProcessingException {
         List<Catalog> catalogs = catalogRepository.findAll();
         Map<Long, CatalogResponse> responseMap = catalogs.stream()
-                .map((Catalog catalog) -> toCatalogResponse(catalog,false, false))
+                .map((Catalog catalog) -> toCatalogResponse(catalog, false, false))
                 .collect(Collectors.toMap(CatalogResponse::getId, response -> response));
 
         List<CatalogResponse> rootCatalogs = new ArrayList<>();
@@ -109,9 +109,13 @@ public class ProductServiceImpl implements ProductService {
             if (catalog.getParentCatalog() != null) {
                 CatalogResponse parentResponse = responseMap.get(catalog.getParentCatalog().getId());
                 if (parentResponse != null) {
-                    parentResponse.getSubCatalogs().add(response);
+                    // Добавляем только если не существует
+                    if (!parentResponse.getSubCatalogs().contains(response)) {
+                        parentResponse.getSubCatalogs().add(response);
+                    }
                 }
             } else {
+                // Если это корневой каталог
                 rootCatalogs.add(response);
             }
         }
