@@ -108,7 +108,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/catalogs")
+    @GetMapping("/categories")
     public List<CatalogResponse> getAllCatalogs() throws JsonProcessingException {
         return productService.getAllCatalogs();
     }
