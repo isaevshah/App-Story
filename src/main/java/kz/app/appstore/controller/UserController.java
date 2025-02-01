@@ -23,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -96,9 +97,15 @@ public class UserController {
         try {
             Path filePath = Paths.get("/data/uploads").resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
+
             if (resource.exists() && resource.isReadable()) {
+                // Определение типа файла динамически
+                String contentType = Files.probeContentType(filePath);
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
                 return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
+                        .contentType(MediaType.parseMediaType(contentType))
                         .body(resource);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
