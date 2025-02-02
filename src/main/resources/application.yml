@@ -33,3 +33,5 @@ jwt:
 server:
   port: 8080
   forward-headers-strategy: framework
+  servlet:
+    context-path: /shop-service

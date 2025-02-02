@@ -13,7 +13,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url("/shop-service"))
+//                .addServersItem(new Server().url("/shop-service"))
                 .info(new Info()
                         .title("Shop Service API")
                         .description("API для свободного пользования внешними организациями для получения различных услуг")
