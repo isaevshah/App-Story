@@ -22,6 +22,7 @@ springdoc:
     path: /shop-service/v3/api-docs
   swagger-ui:
     path: /shop-service/swagger-ui
+    config-url: /shop-service/v3/api-docs/swagger-config
     url: /shop-service/v3/api-docs
     csrf:
       enabled: true
