@@ -19,11 +19,10 @@ upload:
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
+    path: /v3/api-docs  # Swagger сам добавит /shop-service
   swagger-ui:
-    path: /swagger-ui
-    config-url: /v3/api-docs/swagger-config
-    url: /v3/api-docs
+    path: /swagger-ui  # Swagger сам добавит /shop-service
+    url: /shop-service/v3/api-docs  # ВАЖНО! Правильный путь к OpenAPI JSON
     csrf:
       enabled: true
 jwt:
