@@ -19,11 +19,11 @@ upload:
 springdoc:
   api-docs:
     enabled: true
-    path: /shop-service/v3/api-docs
+    path: /v3/api-docs
   swagger-ui:
-    path: /shop-service/swagger-ui
-    config-url: /shop-service/v3/api-docs/swagger-config
-    url: /shop-service/v3/api-docs
+    path: /swagger-ui
+    config-url: /v3/api-docs/swagger-config
+    url: /v3/api-docs
     csrf:
       enabled: true
 jwt:
