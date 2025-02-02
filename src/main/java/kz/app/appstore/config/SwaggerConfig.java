@@ -11,29 +11,17 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
-
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url("/payment-service"))
+                .addServersItem(new Server().url("/shop-service"))
                 .info(new Info()
-                        .title("Online Bank Payment Service API")
-                        .description("API для управления пользователем Онлайн-банкинга")
+                        .title("Shop Service API")
+                        .description("API для свободного пользования внешними организациями для получения различных услуг")
                         .version("0.0.1")
                         .contact(new Contact()
-                                .name("Isaev Shahruh")
-                                .email("isaevshahruh2001@gmail.com")))
-                // Define multiple security requirements for the API
-                .components(new io.swagger.v3.oas.models.Components()
-                        // Define Bearer Auth (JWT)
-                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT"))
-                        // Define Basic Auth
-                        .addSecuritySchemes("basicAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("basic")));
+                                .name("Shahruh Isaev")
+                                .email("shahruhi@bankffin.kz")));
     }
 
     @Bean
