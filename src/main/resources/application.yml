@@ -19,11 +19,12 @@ upload:
 springdoc:
   api-docs:
     enabled: true
+    path: /shop-service/v3/api-docs
   swagger-ui:
-    url: /v3/api-docs
+    path: /shop-service/swagger-ui
+    url: /shop-service/v3/api-docs
     csrf:
       enabled: true
-
 jwt:
   accessTokenExpiration: '3600000'
   refreshTokenExpiration: '604800000'
