@@ -1,6 +1,6 @@
 spring:
   application:
-    name: AppStore
+    name: shop-service
   datasource:
     url: jdbc:postgresql://junction.proxy.rlwy.net:37076/railway
     username: postgres

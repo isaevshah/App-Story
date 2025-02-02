@@ -2,7 +2,6 @@ package kz.app.appstore.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.product.FavoriteProductResponse;
 import kz.app.appstore.dto.product.ProductResponse;
 import kz.app.appstore.entity.Favorite;
