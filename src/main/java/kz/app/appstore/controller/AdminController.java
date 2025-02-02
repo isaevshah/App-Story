@@ -1,5 +1,7 @@
 package kz.app.appstore.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kz.app.appstore.dto.admin.AdminUserCreationDTO;
 import kz.app.appstore.dto.admin.EmployeesDto;
@@ -24,6 +26,7 @@ public class AdminController {
         this.adminService = adminService;
     }
 
+    @Operation(summary = "Создание продукта", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/create-employee")
     public ResponseEntity<Void> createManager(@Valid @RequestBody AdminUserCreationDTO userRegistrationDTO){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -32,19 +35,22 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Удаление сотрудника", security = {@SecurityRequirement(name = "bearerAuth")})
     @DeleteMapping("/delete-customer/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         adminService.deleteManager(id);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Получение всех сотрудников", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/all-employees/get")
     public List<EmployeesDto> getAllEmployees() {
         return adminService.getAllEmployees();
     }
 
+    @Operation(summary = "Обновление сотрудника", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/employee/{userId}/update")
-    public ResponseEntity<?> updateCatalog(@PathVariable Long userId, @RequestBody AdminUserCreationDTO request) {
+    public ResponseEntity<?> updateEmployee(@PathVariable Long userId, @RequestBody AdminUserCreationDTO request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String adminUsername = auth.getName();

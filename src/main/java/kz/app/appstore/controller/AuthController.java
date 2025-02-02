@@ -1,5 +1,7 @@
 package kz.app.appstore.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import kz.app.appstore.config.JwtUtil;
 import kz.app.appstore.dto.auth.AuthResponseDto;
 import kz.app.appstore.dto.auth.LoginRequestDto;
@@ -30,6 +32,7 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @Operation(summary = "Регистрация", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegistrationDTO registrationDTO) {
         try {
@@ -49,6 +52,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Войти", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto loginRequest) {
         try {
@@ -73,6 +77,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Получение refresh-токена", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDto request) {
         String refreshToken = request.getRefreshToken();

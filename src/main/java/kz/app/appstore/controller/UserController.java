@@ -1,6 +1,8 @@
 package kz.app.appstore.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.cart.CartItemResponse;
 import kz.app.appstore.dto.catalog.CatalogResponse;
@@ -43,6 +45,7 @@ public class UserController {
         this.favoriteService = favoriteService;
     }
 
+    @Operation(summary = "Получение всех продуктов", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/all-products/get")
     public ResponseEntity<?> getAllProducts(
             @RequestParam(defaultValue = "0", required = false) int page,
@@ -60,6 +63,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Получение hot-продукты", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/hot-products")
     public ResponseEntity<?> getHotProducts(
             @RequestParam(defaultValue = "0", required = false) int page,
@@ -74,6 +78,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
     }
+
+    @Operation(summary = "Получение продуктов по айди каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/catalogs/{catalogId}/products")
     public ResponseEntity<?> getProductsByCatalogId(
             @PathVariable Long catalogId,
@@ -92,6 +98,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Получение фото", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/images/{fileName}")
     public ResponseEntity<Resource> serveFile(@PathVariable String fileName) {
         try {
@@ -115,11 +122,13 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Получение всех каталогов", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/categories")
     public List<CatalogResponse> getAllCatalogs() throws JsonProcessingException {
         return productService.getAllCatalogs();
     }
 
+    @Operation(summary = "Получение всех под каталогов по айди каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/catalogs/{parentCatalogId}/get")
     public ResponseEntity<?> getCatalogsByParentId(@PathVariable Long parentCatalogId) {
         try {
@@ -132,6 +141,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Добавить товар в корзинку", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/cart/cart-item/{productId}/{quantity}/create")
     public ResponseEntity<?> createCartItem(@PathVariable Long productId, @PathVariable int quantity) {
         log.info("Got productId {}", productId);
@@ -147,6 +157,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Получение корзинок", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/cart/by-session/get")
     public ResponseEntity<?> getCartBySession() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -161,6 +172,7 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Добавление в избранное", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/add-favorite/{productId}")
     void addFavorite(@PathVariable Long productId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -168,6 +180,7 @@ public class UserController {
         favoriteService.addFavorite(username, productId);
     }
 
+    @Operation(summary = "Получить избранное", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/favorite-products")
     public ResponseEntity<?> getFavoriteProducts() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

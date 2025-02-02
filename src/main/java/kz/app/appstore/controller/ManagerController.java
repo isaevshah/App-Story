@@ -2,6 +2,8 @@ package kz.app.appstore.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.catalog.*;
 import kz.app.appstore.dto.error.ErrorResponse;
@@ -39,6 +41,7 @@ public class ManagerController {
         this.objectMapper = objectMapper;
     }
 
+    @Operation(summary = "Создание каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping(value = "/catalogs/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CatalogResponse> createCatalog(@ModelAttribute CreateCatalogRequest request) throws JsonProcessingException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -48,6 +51,7 @@ public class ManagerController {
         return ResponseEntity.ok(catalogResponse);
     }
 
+    @Operation(summary = "Создание под каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/under-catalogs/{parentCatalogId}/create")
     public ResponseEntity<CatalogResponse> createUnderCatalog(@PathVariable Long parentCatalogId, @RequestBody CreateCatalogRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -55,12 +59,14 @@ public class ManagerController {
         return ResponseEntity.ok(productService.createUnderCatalog(parentCatalogId, request, username));
     }
 
+    @Operation(summary = "Удаление каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @DeleteMapping("/catalogs/{catalogId}/delete")
     public ResponseEntity<Void> deleteCatalog(@PathVariable Long catalogId) {
         productService.deleteCatalog(catalogId);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Создание продукта", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping(value = "/catalogs/{catalogId}/product-create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @PathVariable Long catalogId,
@@ -77,6 +83,7 @@ public class ManagerController {
         }
     }
 
+    @Operation(summary = "Обновление продукта", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/product/{productId}/update")
     public ResponseEntity<?> updateProduct(@PathVariable Long productId, @ModelAttribute UpdateProductRequest request) {
         try {
@@ -89,6 +96,7 @@ public class ManagerController {
         }
     }
 
+    @Operation(summary = "Получение детали продукта по айди", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/product-details/{productId}/get")
     public ResponseEntity<?> getProductDetailsByProductId(@PathVariable Long productId) {
         try {
@@ -99,6 +107,7 @@ public class ManagerController {
         }
     }
 
+    @Operation(summary = "Обновление каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/catalog/{catalogId}/update")
     public ResponseEntity<?> updateCatalog(@PathVariable Long catalogId, @RequestBody CreateCatalogRequest request) {
         try {
@@ -111,6 +120,7 @@ public class ManagerController {
         }
     }
 
+    @Operation(summary = "Удаление продукта", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/delete-product/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
         productService.deleteProduct(productId);
