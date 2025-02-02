@@ -20,10 +20,10 @@ springdoc:
   api-docs:
     enabled: true
   swagger-ui:
-    config-url: /shop-service/v3/api-docs/swagger-config
     url: /v3/api-docs
     csrf:
       enabled: true
+
 jwt:
   accessTokenExpiration: '3600000'
   refreshTokenExpiration: '604800000'

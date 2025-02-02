@@ -29,7 +29,7 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("shop-service")
                 .packagesToScan("kz.app.appstore")
-                .pathsToMatch("/")//.pathsToMatch("/")
+                .pathsToMatch("/**")//.pathsToMatch("/")
                 .build();
     }
 }
