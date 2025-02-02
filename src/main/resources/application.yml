@@ -21,7 +21,7 @@ springdoc:
     enabled: true
   swagger-ui:
     config-url: /shop-service/v3/api-docs/swagger-config
-    url: /shop-service/v3/api-docs
+    url: /v3/api-docs
     csrf:
       enabled: true
 jwt:
