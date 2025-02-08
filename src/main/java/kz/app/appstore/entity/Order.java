@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,10 +17,16 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date orderDate;
+    private LocalDateTime orderDate;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private Double totalPrice;
+    private String firstname;
+    private String lastname;
+    private String country;
+    private String city;
+    private String phoneNumber;
+    private String point;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

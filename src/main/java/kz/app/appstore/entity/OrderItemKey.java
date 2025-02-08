@@ -16,10 +16,10 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "order_item_key")
 public class OrderItemKey implements Serializable {
     @Column(name = "order_id")
     private Long orderId;
+
     @Column(name = "product_id")
     private Long productId;
 
@@ -36,5 +36,4 @@ public class OrderItemKey implements Serializable {
     public int hashCode() {
         return Objects.hash(orderId, productId);
     }
-
 }
