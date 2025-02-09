@@ -27,6 +27,7 @@ public class Order {
     private String city;
     private String phoneNumber;
     private String point;
+    private String storagePlace;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/manager/**").hasAnyRole("MANAGER", "ADMIN")
-                        .requestMatchers("/api/worker/**").hasAnyRole("WAREHOUSE_WORKER", "ADMIN")
+                        .requestMatchers("/api/worker/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
