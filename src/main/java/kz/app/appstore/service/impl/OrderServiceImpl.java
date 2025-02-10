@@ -2,6 +2,7 @@ package kz.app.appstore.service.impl;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageConfig;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -19,7 +20,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -147,24 +152,43 @@ public class OrderServiceImpl implements OrderService {
                 order.getFirstname(), order.getLastname(),
                 order.getStatus().name(), order.getTotalPrice());
 
-        String qrCodeBase64 = generateQRCode(qrData);
-
-        // Возвращаем изображение QR-кода
-        byte[] decodedQrCode = Base64.getDecoder().decode(qrCodeBase64);
+        byte[] decodedQrCode = generateQRCodeWithLogo(qrData, "src/main/resources/images/logo/cat_with_glassess.jpg");
         return ResponseEntity.ok()
                 .header("Content-Type", "image/png")
                 .body(decodedQrCode);
     }
 
-    private String generateQRCode(String data) {
+    public static byte[] generateQRCodeWithLogo(String text, String logoPath) {
+        int size = 400;
+        int borderSize = 20;
+        int logoSize = size / 4;
+
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(data, BarcodeFormat.QR_CODE, 200, 200);
+            BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, size, size);
+
+            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix, new MatrixToImageConfig());
+
+            BufferedImage qrWithBorder = new BufferedImage(size + 2 * borderSize, size + 2 * borderSize, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = qrWithBorder.createGraphics();
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, qrWithBorder.getWidth(), qrWithBorder.getHeight());
+            g.drawImage(qrImage, borderSize, borderSize, null);
+
+            BufferedImage logo = ImageIO.read(new File(logoPath));
+
+            Image scaledLogo = logo.getScaledInstance(logoSize, logoSize, Image.SCALE_SMOOTH);
+
+            int centerX = (qrWithBorder.getWidth() - logoSize) / 2;
+            int centerY = (qrWithBorder.getHeight() - logoSize) / 2;
+            g.drawImage(scaledLogo, centerX, centerY, null);
+
+            g.dispose();
 
             ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+            ImageIO.write(qrWithBorder, "PNG", pngOutputStream);
+            return pngOutputStream.toByteArray();
 
-            return Base64.getEncoder().encodeToString(pngOutputStream.toByteArray());
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Ошибка при генерации QR-кода", e);
         }
