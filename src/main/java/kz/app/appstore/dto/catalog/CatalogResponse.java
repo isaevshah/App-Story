@@ -15,7 +15,7 @@ public class CatalogResponse {
     private String description;
     private ParentCatalogResponse parentCatalog;
     private List<CatalogResponse> subCatalogs;
-    private String imageBase64;
+    private String imageName;
 
     @Override
     public boolean equals(Object o) {

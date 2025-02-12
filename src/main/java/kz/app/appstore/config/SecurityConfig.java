@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/shop-service/swagger-ui/**", "/shop-service/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/manager/**").hasAnyRole("MANAGER", "ADMIN")
                         .requestMatchers("/api/worker/**").hasAnyRole("WAREHOUSE_WORKER", "ADMIN")

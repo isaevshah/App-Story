@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,8 +26,8 @@ public class Catalog {
     private String updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @Lob
-    private byte[] image;
+
+    private String imageName;
 
     @ManyToOne
     @JoinColumn(name = "parent_id")
@@ -36,6 +37,7 @@ public class Catalog {
     @OneToMany(mappedBy = "parentCatalog", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Catalog> subCatalogs;
+
 
     @OneToMany(mappedBy = "catalog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;

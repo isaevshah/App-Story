@@ -2,7 +2,6 @@ package kz.app.appstore.controller;
 
 import kz.app.appstore.dto.order.OrderCreationResponseDto;
 import kz.app.appstore.dto.order.OrderRequestDto;
-import kz.app.appstore.entity.Order;
 import kz.app.appstore.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

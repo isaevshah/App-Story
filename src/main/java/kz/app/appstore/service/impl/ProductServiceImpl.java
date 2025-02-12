@@ -62,9 +62,8 @@ public class ProductServiceImpl implements ProductService {
         catalog.setCreatedAt(LocalDateTime.now());
         catalog.setCreatedBy(username);
 
-        if (catalogRequest.getImage() != null && !catalogRequest.getImage().isEmpty()) {
-            catalog.setImage(catalogRequest.getImage().getBytes());
-        }
+        String imageName = saveImageFile(catalogRequest.getImage());
+        catalog.setImageName(imageName);
 
         Catalog savedCatalog = catalogRepository.save(catalog);
         return toCatalogResponse(savedCatalog, false, false);
@@ -80,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
         catalog.setCreatedAt(LocalDateTime.now());
 
         if (catalogRequest.getImage() != null && !catalogRequest.getImage().isEmpty()) {
-            catalog.setImage(catalogRequest.getImage().getBytes());
+            catalog.setImageName(saveImageFile(catalogRequest.getImage()));
         }
         if (parentCatalogId != null) {
             Catalog parent = catalogRepository.findById(parentCatalogId)
@@ -364,10 +363,6 @@ public class ProductServiceImpl implements ProductService {
                     catalog.getParentCatalog().getDescription()
             );
         }
-        String imageBase64 = null;
-        if (includeImage && catalog.getImage() != null) {
-            imageBase64 = Base64.getEncoder().encodeToString(catalog.getImage());
-        }
         List<CatalogResponse> subCatalogResponses = catalog.getSubCatalogs() != null
                 ? catalog.getSubCatalogs().stream()
                 .map(subCatalog -> toCatalogResponse(subCatalog, false, false)) // Рекурсивный вызов
@@ -380,7 +375,7 @@ public class ProductServiceImpl implements ProductService {
                 catalog.getDescription(),
                 parentCatalogResponse,
                 subCatalogResponses,
-                imageBase64
+                catalog.getImageName()
         );
     }
 
