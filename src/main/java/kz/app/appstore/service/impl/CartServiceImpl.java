@@ -53,6 +53,30 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
+    public void removeFromCart(Long productId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        Cart cart = user.getCart();
+        if (cart == null || cart.getCartItems().isEmpty()) {
+            throw new EntityNotFoundException("Cart is empty or does not exist for user: " + username);
+        }
+
+        // Найти товар в корзине
+        CartItem cartItem = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Product not found in cart: " + productId));
+
+        // Удалить товар из корзины
+        cart.getCartItems().remove(cartItem);
+        cartItemRepository.delete(cartItem);
+
+        // Обновить сумму корзины
+        updateCartTotalPrice(cart);
+    }
+
+    @Override
     public List<CartItemResponse> getCartList(String username) {
         Cart cart = getCartByUsername(username); // Получаем корзину пользователя
         List<CartItem> cartItems = cart.getCartItems(); // Получаем список товаров в корзине

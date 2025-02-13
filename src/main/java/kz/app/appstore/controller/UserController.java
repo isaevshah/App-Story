@@ -44,6 +44,20 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Удалить товар из корзины", security = {@SecurityRequirement(name = "bearerAuth")})
+    @DeleteMapping("/cart/cart-item/{productId}/delete")
+    public ResponseEntity<?> deleteCartItem(@PathVariable Long productId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        try {
+            cartService.removeFromCart(productId, username);
+            return ResponseEntity.ok("Product removed from cart successfully");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+
     @Operation(summary = "Получение корзинок", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/cart/by-session/get")
     public ResponseEntity<?> getCartBySession() {
