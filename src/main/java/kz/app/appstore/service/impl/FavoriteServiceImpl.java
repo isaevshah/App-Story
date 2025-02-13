@@ -2,6 +2,7 @@ package kz.app.appstore.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.product.FavoriteProductResponse;
 import kz.app.appstore.dto.product.ProductResponse;
 import kz.app.appstore.entity.Favorite;
@@ -14,6 +15,7 @@ import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.FavoriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,6 +66,19 @@ public class FavoriteServiceImpl implements FavoriteService {
         totalProducts.setProductResponse(productResponses);
         return totalProducts;
     }
+
+    @Override
+    @Transactional
+    public void removeFavorite(String username, Long productId) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
+
+        Favorite favorite = favoriteRepository.findByUserIdAndProductId(user.getId(), productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product is not in the user's favorites."));
+
+        favoriteRepository.delete(favorite);
+    }
+
 
     private ProductResponse convertToProductResponse(Product product) {
         ObjectMapper objectMapper = new ObjectMapper();

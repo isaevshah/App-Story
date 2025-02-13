@@ -95,4 +95,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
     }
+
+    @Operation(summary = "Удаление из избранного", security = {@SecurityRequirement(name = "bearerAuth")})
+    @DeleteMapping("/remove-favorite/{productId}")
+    public ResponseEntity<?> removeFavorite(@PathVariable Long productId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        try {
+            favoriteService.removeFavorite(username, productId);
+            return ResponseEntity.ok("Product removed from favorites successfully");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 }
