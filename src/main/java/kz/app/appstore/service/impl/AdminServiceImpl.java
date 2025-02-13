@@ -4,13 +4,15 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import kz.app.appstore.dto.admin.AdminUserCreationDTO;
 import kz.app.appstore.dto.admin.EmployeesDto;
-import kz.app.appstore.entity.Catalog;
+import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.entity.Profile;
 import kz.app.appstore.entity.User;
 import kz.app.appstore.enums.Role;
 import kz.app.appstore.enums.UserType;
+import kz.app.appstore.repository.OrderRepository;
 import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.AdminService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,14 +23,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public AdminServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final OrderRepository orderRepository;
 
     @Override
     public void createManager(AdminUserCreationDTO userCreationDTO, String adminUsername) {

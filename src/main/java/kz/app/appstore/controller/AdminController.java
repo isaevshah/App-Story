@@ -6,7 +6,10 @@ import jakarta.validation.Valid;
 import kz.app.appstore.dto.admin.AdminUserCreationDTO;
 import kz.app.appstore.dto.admin.EmployeesDto;
 import kz.app.appstore.dto.error.ErrorResponse;
+import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.service.AdminService;
+import kz.app.appstore.service.OrderService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,12 +22,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize(value = "hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
-
-    public AdminController(AdminService adminService) {
-        this.adminService = adminService;
-    }
+    private final OrderService orderService;
 
     @Operation(summary = "Создание продукта", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/create-employee")
@@ -47,6 +48,14 @@ public class AdminController {
     public List<EmployeesDto> getAllEmployees() {
         return adminService.getAllEmployees();
     }
+
+    @Operation(summary = "Получить все заказы", security = {@SecurityRequirement(name = "bearerAuth")})
+    @GetMapping("/orders/all")
+    public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
+        List<OrderResponseDto> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
 
     @Operation(summary = "Обновление сотрудника", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/employee/{userId}/update")
