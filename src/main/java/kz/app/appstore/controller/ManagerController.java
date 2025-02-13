@@ -53,7 +53,7 @@ public class ManagerController {
 
     @Operation(summary = "Создание под каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/under-catalogs/{parentCatalogId}/create")
-    public ResponseEntity<CatalogResponse> createUnderCatalog(@PathVariable Long parentCatalogId, @RequestBody CreateCatalogRequest request) {
+    public ResponseEntity<CatalogResponse> createUnderCatalog(@PathVariable Long parentCatalogId, @ModelAttribute CreateCatalogRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         return ResponseEntity.ok(productService.createUnderCatalog(parentCatalogId, request, username));
