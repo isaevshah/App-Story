@@ -109,7 +109,7 @@ public class ManagerController {
 
     @Operation(summary = "Обновление каталога", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/catalog/{catalogId}/update")
-    public ResponseEntity<?> updateCatalog(@PathVariable Long catalogId, @RequestBody CreateCatalogRequest request) {
+    public ResponseEntity<?> updateCatalog(@PathVariable Long catalogId, @ModelAttribute CreateCatalogRequest request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();

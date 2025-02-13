@@ -308,6 +308,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @SneakyThrows
     public void updateCatalog(Long catalogId, CreateCatalogRequest catalogRequest, String username) {
         Catalog catalog = catalogRepository.findById(catalogId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found: " + catalogId));
@@ -315,6 +316,7 @@ public class ProductServiceImpl implements ProductService {
         catalog.setDescription(catalogRequest.getDescription());
         catalog.setUpdatedBy(username);
         catalog.setUpdatedAt(LocalDateTime.now());
+        catalog.setImageName(saveImageFile(catalogRequest.getImage()));
         catalogRepository.save(catalog);
     }
 
