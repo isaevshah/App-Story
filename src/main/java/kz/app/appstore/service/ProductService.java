@@ -19,6 +19,7 @@ public interface ProductService {
     ProductResponseDTO createProduct(Long catalogId, CreateProductRequest request, String username) throws ProductCreationException;
     Page<ProductResponse> getProductsByCatalogId(Long catalogId, int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
     List<ProductResponse> getLikedProducts();
+    ProductResponse getProductById(Long id);
     Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String sortDir) throws JsonProcessingException;
     Page<ProductResponse> getAllHotProducts(int page, int size) throws JsonProcessingException;
     void updateProduct(Long productId, UpdateProductRequest request, String username) throws ProductCreationException;

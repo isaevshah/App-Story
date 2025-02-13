@@ -257,6 +257,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ProductResponse getProductById(Long id) {
+        Product product = productRepository.findById(id).orElseThrow();
+        return convertToProductResponse(product);
+    }
+
+    @Override
     public Page<ProductResponse> getAllProducts(int page, int size, String sortBy, String sortDir) throws JsonProcessingException {
         List<String> allowedSortFields = Arrays.asList("id", "name", "price", "quantity");
         if (!allowedSortFields.contains(sortBy)) {

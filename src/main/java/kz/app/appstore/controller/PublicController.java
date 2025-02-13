@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.dto.product.ProductResponse;
+import kz.app.appstore.dto.product.ProductResponseDTO;
 import kz.app.appstore.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,6 +94,12 @@ public class PublicController {
     @GetMapping("/categories")
     public List<CatalogResponse> getAllCatalogs() throws JsonProcessingException {
         return productService.getAllCatalogs();
+    }
+
+    @Operation(summary = "Получение продукта по id")
+    @GetMapping("/product/{id}")
+    public ProductResponse getProductById(@PathVariable Long id) {
+        return productService.getProductById(id);
     }
 
     @Operation(summary = "Получение всех под каталогов по айди каталога")
