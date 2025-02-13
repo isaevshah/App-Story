@@ -11,6 +11,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemResponse {
+    private Long id;
     private String individualCode;
     private String name;
     private Double price;

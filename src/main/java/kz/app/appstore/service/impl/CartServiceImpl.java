@@ -102,6 +102,7 @@ public class CartServiceImpl implements CartService {
 
             // Формирование CartItemResponse
             return new CartItemResponse(
+                    product.getId(),
                     product.getIndividualCode(),
                     product.getName(),
                     product.getPrice(),
