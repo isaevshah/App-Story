@@ -148,11 +148,9 @@ public class OrderServiceImpl implements OrderService {
         order.setStoragePlace(storageOfProduct);
         orderRepository.save(order);
 
-        String qrData = String.format("ФИО: %s %s\nСтатус: %s\nСумма: %.2f\nВидео: ",
-                order.getFirstname(), order.getLastname(),
-                order.getStatus().name(), order.getTotalPrice());
+        String qrData = "https://youtu.be/7FEhvFgBSq4";
 
-        byte[] decodedQrCode = generateQRCodeWithLogo(qrData, "src/main/resources/images/logo/cat_with_glassess.jpg");
+        byte[] decodedQrCode = generateQRCodeWithLogo(qrData, "src/main/resources/images/logo/standing_cat.jpg");
         return ResponseEntity.ok()
                 .header("Content-Type", "image/png")
                 .body(decodedQrCode);
