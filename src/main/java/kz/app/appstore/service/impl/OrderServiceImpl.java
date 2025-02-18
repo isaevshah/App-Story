@@ -35,10 +35,31 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderCreationResponseDto createOrder(OrderRequestDto request, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        User user = getUserByUsername(username);
+        Order order = createOrderEntity(request, user);
+        List<OrderItem> orderItems = createOrderItems(request, order);
+        double totalPrice = calculateTotalPrice(orderItems);
 
-        // Создание нового заказа
+        order.setOrderItems(orderItems);
+        order.setTotalPrice(totalPrice);
+        orderRepository.save(order);
+
+        createPaymentRecord(order, request.getPaymentMethod());
+
+        return new OrderCreationResponseDto(
+                order.getId(),
+                order.getTotalPrice(),
+                order.getStatus().name(),
+                request.getPaymentMethod()
+        );
+    }
+
+    private User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+    }
+
+    private Order createOrderEntity(OrderRequestDto request, User user) {
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
@@ -49,46 +70,45 @@ public class OrderServiceImpl implements OrderService {
         order.setCity(request.getCity());
         order.setPhoneNumber(request.getPhoneNumber());
         order.setPoint(request.getPoint());
+        return order;
+    }
 
+    private List<OrderItem> createOrderItems(OrderRequestDto request, Order order) {
         List<OrderItem> orderItems = new ArrayList<>();
-        double totalPrice = 0;
-
         for (OrderItemRequestDto itemRequest : request.getItems()) {
-            Product product = productRepository.findById(itemRequest.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Товар не найден"));
-
-            OrderItem orderItem = new OrderItem();
-            OrderItemKey orderItemKey = new OrderItemKey(order.getId(), product.getId());
-
-            orderItem.setId(orderItemKey);
-            orderItem.setOrder(order);
-            orderItem.setProduct(product);
-            orderItem.setQuantity(itemRequest.getQuantity());
-            orderItem.setPrice(product.getPrice() * itemRequest.getQuantity());
-
+            Product product = getProductById(itemRequest.getProductId());
+            OrderItem orderItem = createOrderItem(order, product, itemRequest.getQuantity());
             orderItems.add(orderItem);
-            totalPrice += orderItem.getPrice();
         }
+        return orderItems;
+    }
 
-        order.setOrderItems(orderItems);
-        order.setTotalPrice(totalPrice);
-        orderRepository.save(order);
+    private Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Товар не найден"));
+    }
 
-        // Создаём запись об оплате
+    private OrderItem createOrderItem(Order order, Product product, int quantity) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(new OrderItemKey(order.getId(), product.getId()));
+        orderItem.setOrder(order);
+        orderItem.setProduct(product);
+        orderItem.setQuantity(quantity);
+        orderItem.setPrice(product.getPrice() * quantity);
+        return orderItem;
+    }
+
+    private double calculateTotalPrice(List<OrderItem> orderItems) {
+        return orderItems.stream().mapToDouble(OrderItem::getPrice).sum();
+    }
+
+    private void createPaymentRecord(Order order, String paymentMethod) {
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setPaymentMethod(request.getPaymentMethod());
+        payment.setPaymentMethod(paymentMethod);
         payment.setPaymentDate(LocalDateTime.now());
         paymentRepository.save(payment);
-
-        // Возвращаем сокращённый DTO
-        return new OrderCreationResponseDto(
-                order.getId(),
-                order.getTotalPrice(),
-                order.getStatus().name(),
-                request.getPaymentMethod()
-        );
     }
 
     @Override
