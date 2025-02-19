@@ -3,12 +3,14 @@ package kz.app.appstore.service;
 // UserService.java
 import jakarta.validation.ValidationException;
 import kz.app.appstore.dto.auth.UserRegistrationDTO;
+import kz.app.appstore.dto.user.UserInfoDto;
 import kz.app.appstore.entity.Profile;
 import kz.app.appstore.entity.User;
 import kz.app.appstore.enums.Role;
 import kz.app.appstore.enums.UserType;
 import kz.app.appstore.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +50,18 @@ public class UserService {
         profile.setUser(user);
 
         userRepository.save(user);
+    }
+
+    public UserInfoDto getUserInfo(String username){
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return UserInfoDto.builder()
+                .firstname(user.getProfile().getFirstName())
+                .lastname(user.getProfile().getLastName())
+                .phoneNumber(user.getProfile().getPhoneNumber())
+                .bin(user.getProfile().getBin())
+                .companyName(user.getProfile().getCompanyName())
+                .build();
     }
 }
 

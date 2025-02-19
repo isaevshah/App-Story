@@ -6,9 +6,11 @@ import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.cart.CartItemResponse;
 import kz.app.appstore.dto.product.FavoriteProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
+import kz.app.appstore.dto.user.UserInfoDto;
 import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.FavoriteService;
+import kz.app.appstore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ import java.util.List;
 public class UserController {
     private final CartService cartService;
     private final FavoriteService favoriteService;
+    private final UserService userService;
 
     @Operation(summary = "Добавить товар в корзинку", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/cart/cart-item/{productId}/{quantity}/create")
@@ -109,4 +112,11 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Детали пользователя", security = {@SecurityRequirement(name = "bearerAuth")})
+    @GetMapping("/user-info")
+    public UserInfoDto getUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return userService.getUserInfo(username);
+    }
 }

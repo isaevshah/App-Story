@@ -42,6 +42,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setOrderItems(orderItems);
         order.setTotalPrice(totalPrice);
+        order.setOrderCode("");
         orderRepository.save(order);
 
         createPaymentRecord(order, request.getPaymentMethod());
