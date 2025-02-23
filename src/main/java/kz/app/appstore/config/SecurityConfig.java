@@ -56,7 +56,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://app-store.up.railway.app:3000")); // Разрешаем ваш фронтенд
+        configuration.setAllowedOrigins(List.of("https://app-store-murex.vercel.app:3000")); // Разрешаем ваш фронтенд
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true); // Если используете куки или авторизацию
