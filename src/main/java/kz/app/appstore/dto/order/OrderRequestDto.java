@@ -13,11 +13,12 @@ public class OrderRequestDto {
     private String firstname;
     private String lastname;
     private String companyName;
-    private String paymentMethod; // KASPI_QR, CARD, CASH
+    private String paymentMethod;
     private String phoneNumber;
     private String country;
     private String city;
     private String point;
     private Double totalPrice;
+    private String currencyCode;
     private List<OrderItemRequestDto> items;
 }

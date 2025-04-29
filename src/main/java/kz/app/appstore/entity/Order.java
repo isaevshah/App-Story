@@ -1,4 +1,5 @@
 package kz.app.appstore.entity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import kz.app.appstore.enums.OrderStatus;
 import lombok.AllArgsConstructor;

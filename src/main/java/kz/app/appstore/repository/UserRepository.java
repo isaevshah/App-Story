@@ -1,7 +1,5 @@
 package kz.app.appstore.repository;
 
-import kz.app.appstore.dto.admin.EmployeesDto;
-import kz.app.appstore.entity.Catalog;
 import kz.app.appstore.entity.User;
 import kz.app.appstore.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;

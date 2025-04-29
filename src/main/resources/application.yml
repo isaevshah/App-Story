@@ -14,6 +14,14 @@ spring:
   servlet:
     multipart:
       max-file-size: 3MB
+paypal:
+  client:
+    id: AfQySflty7K-ye9gwxO-23vZXSls0_cz1pvR-rGeX2H1rhi1HTUF6NoTdqaQPSETFipm4u-00gg8xcvQ
+    secret: ELy30fKAvTUyjYxlX6ZQXYmk2Ef7u4sm6JgXpKUCcmHChbzKPyHlj0WMD74FNrFwZrSBGm25T5V4kYRo
+  mode: sandbox
+  return-url: "https://ваш-сайт.com/success"
+  cancel-url: "https://ваш-сайт.com/cancel"
+  webhook-id: "ВАШ_WEBHOOK_ID"
 upload:
   path: /data/uploads #/Users/shahruhisaev/Documents/appstoryimages #
 springdoc:
