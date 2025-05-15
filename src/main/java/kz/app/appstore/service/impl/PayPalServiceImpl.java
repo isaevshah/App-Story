@@ -6,6 +6,7 @@ import com.paypal.orders.*;
 import com.paypal.orders.Order;
 import kz.app.appstore.dto.order.OrderItemRequestDto;
 import kz.app.appstore.dto.order.OrderRequestDto;
+import kz.app.appstore.dto.paypal.PayPalCaptureResponseDto;
 import kz.app.appstore.dto.paypal.PayPalResponseDto;
 import kz.app.appstore.entity.*;
 import kz.app.appstore.enums.OrderStatus;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -98,6 +100,34 @@ public class PayPalServiceImpl implements PayPalService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to create PayPal order: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public PayPalCaptureResponseDto captureOrder(String orderId) throws IOException{
+        OrdersCaptureRequest request = new OrdersCaptureRequest(orderId);
+        request.requestBody(new OrderRequest()); // тело может быть пустым для capture
+
+        HttpResponse<Order> response = payPalHttpClient.execute(request);
+        Order capturedOrder = response.result();
+
+        // Обновим заказ в БД, если у тебя есть такая логика
+        Optional<kz.app.appstore.entity.Order> optionalOrder = orderRepository.findByOrderCode(orderId);
+        if (optionalOrder.isPresent()) {
+            kz.app.appstore.entity.Order order = optionalOrder.get();
+            Optional<kz.app.appstore.entity.Payment> paymentEntity = paymentRepository.findByOrderId(order.getId());
+            if (paymentEntity.isPresent()) {
+                kz.app.appstore.entity.Payment payment = paymentEntity.get();
+                payment.setStatus(PaymentStatus.PAID);
+            }
+            order.setStatus(OrderStatus.CONFIRMED); // например, "COMPLETED"
+            orderRepository.save(order);
+        }
+
+        // Ответ клиенту
+        PayPalCaptureResponseDto result = new PayPalCaptureResponseDto();
+        result.setOrderId(capturedOrder.id());
+        result.setStatus(capturedOrder.status());
+        return result;
     }
 
     private String getApprovalUrl(Order order) {
