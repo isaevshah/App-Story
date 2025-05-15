@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.dto.product.ProductResponse;
-import kz.app.appstore.dto.product.ProductResponseDTO;
 import kz.app.appstore.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -130,4 +129,6 @@ public class PublicController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
     }
+
+
 }

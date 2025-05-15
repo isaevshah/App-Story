@@ -46,4 +46,10 @@ public class PayPalController {
                     .body("Ошибка при захвате оплаты: " + e.getMessage());
         }
     }
+
+    // Этот эндпоинт вызывается, если клиент отменил оплату
+    @GetMapping("/cancel")
+    public ResponseEntity<String> handlePaypalCancel() {
+        return ResponseEntity.ok("Вы отменили оплату.");
+    }
 }
