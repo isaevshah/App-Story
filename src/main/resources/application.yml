@@ -21,7 +21,7 @@ paypal:
   mode: sandbox
   return-url: "https://ваш-сайт.com/success"
   cancel-url: "https://ваш-сайт.com/cancel"
-  webhook-id: "ВАШ_WEBHOOK_ID"
+  webhook-id: 7R026524EA328190C
 upload:
   path: /data/uploads #/Users/shahruhisaev/Documents/appstoryimages #
 springdoc:
