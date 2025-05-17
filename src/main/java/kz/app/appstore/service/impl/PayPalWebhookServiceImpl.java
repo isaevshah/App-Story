@@ -1,5 +1,7 @@
 package kz.app.appstore.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kz.app.appstore.entity.Order;
 import kz.app.appstore.enums.OrderStatus;
 import kz.app.appstore.enums.PaymentStatus;
@@ -24,27 +26,30 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class PayPalWebhookServiceImpl implements PayPalWebhookService {
+    private final ObjectMapper objectMapper;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
 
     @Value("${paypal.webhook-id}")
     private String webhookId;
 
-    public PayPalWebhookServiceImpl(OrderRepository orderRepository, PaymentRepository paymentRepository) {
+    public PayPalWebhookServiceImpl(ObjectMapper objectMapper, OrderRepository orderRepository, PaymentRepository paymentRepository) {
+        this.objectMapper = objectMapper;
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
     }
 
     @Override
-    public ResponseEntity<String> handleWebhook(String body, String transmissionId, String transmissionTime, String transmissionSig, String certUrl, String authAlgo, String webhookIdFromHeader) {
+    public ResponseEntity<String> handleWebhook(String body,
+                                                String transmissionId,
+                                                String transmissionTime,
+                                                String transmissionSig,
+                                                String certUrl,
+                                                String authAlgo) {
         try {
-            if (!webhookId.equals(webhookIdFromHeader)) {
-                log.warn("Webhook ID не совпадает!");
-                return ResponseEntity.status(400).body("Invalid webhook ID");
-            }
-
-            // Собираем и проверяем подпись
+            // 🔐 Проверка подписи
             String expectedSignatureData = transmissionId + "|" + transmissionTime + "|" + webhookId + "|" + body;
+
             PublicKey publicKey = getPaypalPublicKey(certUrl);
             Signature signature = Signature.getInstance(authAlgo);
             signature.initVerify(publicKey);
@@ -52,36 +57,43 @@ public class PayPalWebhookServiceImpl implements PayPalWebhookService {
             boolean isValid = signature.verify(Base64.getDecoder().decode(transmissionSig));
 
             if (!isValid) {
-                log.warn("Неверная подпись вебхука!");
-                return ResponseEntity.status(403).body("Signature invalid");
+                log.warn("❌ Подпись недействительна");
+                return ResponseEntity.status(403).body("Invalid signature");
             }
 
-            // Обновим заказ в БД, если у тебя есть такая логика
-            Optional<Order> optionalOrder = orderRepository.findByOrderCode("4BR71398140424314");
-            if (optionalOrder.isPresent()) {
-                kz.app.appstore.entity.Order order = optionalOrder.get();
-                Optional<kz.app.appstore.entity.Payment> paymentEntity = paymentRepository.findByOrderId(order.getId());
-                if (paymentEntity.isPresent()) {
-                    kz.app.appstore.entity.Payment payment = paymentEntity.get();
-                    payment.setStatus(PaymentStatus.FAILED);
-                }
-                order.setStatus(OrderStatus.DELIVERED); // например, "COMPLETED"
-                orderRepository.save(order);
+            // ✅ Парсим тело и получаем orderId
+            JsonNode jsonNode = objectMapper.readTree(body);
+            String eventType = jsonNode.get("event_type").asText(); // например: CHECKOUT.ORDER.SAVED
+            String paypalOrderId = jsonNode.get("resource").get("id").asText(); // напр: 9NK63094MA726991F
+
+            // 🔎 Ищем заказ по коду (если ты сохранял orderCode = paypalOrderId)
+            Optional<Order> optionalOrder = orderRepository.findByOrderCode(paypalOrderId);
+            if (optionalOrder.isEmpty()) {
+                log.warn("Заказ не найден: {}", paypalOrderId);
+                return ResponseEntity.ok("No action needed");
             }
 
-//            // ✅ Тут логика обновления статуса заказа
-//            JsonNode jsonNode = objectMapper.readTree(body);
-//            String eventType = jsonNode.get("event_type").asText();
-//            String orderId = jsonNode.get("resource").get("id").asText();
-//            String newStatus = jsonNode.get("resource").get("status").asText();
-            log.info("Webhook прошёл верификацию: {}", body);
-            return ResponseEntity.ok("Webhook verified");
+            Order order = optionalOrder.get();
+
+            // 🧾 Обновим статус
+            switch (eventType) {
+//                case "CHECKOUT.ORDER.SAVED" -> order.setStatus(OrderStatus.CREATED);
+                case "CHECKOUT.ORDER.APPROVED" -> order.setStatus(OrderStatus.CONFIRMED);
+                case "PAYMENT.CAPTURE.COMPLETED" -> order.setStatus(OrderStatus.DELIVERED);
+                case "PAYMENT.CAPTURE.DENIED" -> order.setStatus(OrderStatus.CANCELLED);
+                default -> log.info("Необработанный тип события: {}", eventType);
+            }
+
+            orderRepository.save(order);
+            log.info("✅ Вебхук обработан: заказ {} теперь со статусом {}", paypalOrderId, order.getStatus());
+            return ResponseEntity.ok("Webhook processed");
 
         } catch (Exception e) {
-            log.error("Ошибка обработки вебхука", e);
+            log.error("Ошибка при обработке вебхука", e);
             return ResponseEntity.status(500).body("Internal error");
         }
     }
+
 
     private PublicKey getPaypalPublicKey(String certUrl) throws Exception {
         URL url = new URL(certUrl);

@@ -15,17 +15,17 @@ public class PayPalWebhookController {
     private final PayPalWebhookService webhookService;
 
     @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook(
+    public ResponseEntity<String> handlePaypalWebhook(
             @RequestBody String body,
             @RequestHeader("paypal-transmission-id") String transmissionId,
             @RequestHeader("paypal-transmission-time") String transmissionTime,
             @RequestHeader("paypal-transmission-sig") String transmissionSig,
             @RequestHeader("paypal-cert-url") String certUrl,
-            @RequestHeader("paypal-auth-algo") String authAlgo,
-            @RequestHeader("paypal-webhook-id") String webhookIdFromHeader
+            @RequestHeader("paypal-auth-algo") String authAlgo
     ) {
         return webhookService.handleWebhook(
-                body, transmissionId, transmissionTime, transmissionSig, certUrl, authAlgo, webhookIdFromHeader
+                body, transmissionId, transmissionTime, transmissionSig, certUrl, authAlgo
         );
     }
+
 }
