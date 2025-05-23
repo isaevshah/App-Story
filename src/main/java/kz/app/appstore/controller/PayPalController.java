@@ -31,25 +31,23 @@ public class PayPalController {
             PayPalResponseDto response = payPalService.createOrder(request, username);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
 
     @GetMapping("/success")
-    public ResponseEntity<String> handlePaypalSuccess(@RequestParam("token") String orderId) {
+    public ResponseEntity<PayPalCaptureResponseDto> handlePaypalSuccess(@RequestParam("orderId") String orderId) {
         try {
             PayPalCaptureResponseDto response = payPalService.captureOrder(orderId);
-            return ResponseEntity.ok("Оплата прошла успешно! Статус: " + response.getStatus());
+            return ResponseEntity.ok(new PayPalCaptureResponseDto(response.getStatus(), response.getOrderId()));
         } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Ошибка при захвате оплаты: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
         }
     }
 
-    // Этот эндпоинт вызывается, если клиент отменил оплату
     @GetMapping("/cancel")
-    public ResponseEntity<String> handlePaypalCancel() {
-        return ResponseEntity.ok("Вы отменили оплату.");
+    public ResponseEntity<PayPalCaptureResponseDto> handlePaypalCancel(@RequestParam("orderId") String orderId) {
+        payPalService.cancelPayPal(orderId);
+        return ResponseEntity.ok(new PayPalCaptureResponseDto("CANCELLED", orderId));
     }
 }

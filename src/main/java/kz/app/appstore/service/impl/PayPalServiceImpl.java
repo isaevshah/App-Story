@@ -105,12 +105,13 @@ public class PayPalServiceImpl implements PayPalService {
     @Override
     public PayPalCaptureResponseDto captureOrder(String orderId) throws IOException{
         OrdersCaptureRequest request = new OrdersCaptureRequest(orderId);
-        request.requestBody(new OrderRequest()); // тело может быть пустым для capture
+        request.requestBody(new OrderRequest());
 
         HttpResponse<Order> response = payPalHttpClient.execute(request);
         Order capturedOrder = response.result();
 
-        // Обновим заказ в БД, если у тебя есть такая логика
+        log.info("Got orderId and status - {}, {}", capturedOrder.id(), capturedOrder.status());
+
         Optional<kz.app.appstore.entity.Order> optionalOrder = orderRepository.findByOrderCode(orderId);
         if (optionalOrder.isPresent()) {
             kz.app.appstore.entity.Order order = optionalOrder.get();
@@ -119,15 +120,29 @@ public class PayPalServiceImpl implements PayPalService {
                 kz.app.appstore.entity.Payment payment = paymentEntity.get();
                 payment.setStatus(PaymentStatus.PAID);
             }
-            order.setStatus(OrderStatus.CONFIRMED); // например, "COMPLETED"
+            order.setStatus(OrderStatus.CONFIRMED);
             orderRepository.save(order);
         }
 
-        // Ответ клиенту
         PayPalCaptureResponseDto result = new PayPalCaptureResponseDto();
         result.setOrderId(capturedOrder.id());
         result.setStatus(capturedOrder.status());
         return result;
+    }
+
+    @Override
+    public void cancelPayPal(String orderId) {
+        Optional<kz.app.appstore.entity.Order> optionalOrder = orderRepository.findByOrderCode(orderId);
+        if (optionalOrder.isPresent()) {
+            kz.app.appstore.entity.Order order = optionalOrder.get();
+            Optional<kz.app.appstore.entity.Payment> paymentEntity = paymentRepository.findByOrderId(order.getId());
+            if (paymentEntity.isPresent()) {
+                kz.app.appstore.entity.Payment payment = paymentEntity.get();
+                payment.setStatus(PaymentStatus.FAILED);
+            }
+            order.setStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order);
+        }
     }
 
     private String getApprovalUrl(Order order) {
