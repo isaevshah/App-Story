@@ -166,6 +166,7 @@ public class PayPalServiceImpl implements PayPalService {
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
         order.setPayStatus(OrderStatus.PENDING);
+        order.setTrackStatus(TrackStatus.PENDING.name());
         order.setFirstname(request.getFirstname());
         order.setLastname(request.getLastname());
         order.setCountry(request.getCountry());
