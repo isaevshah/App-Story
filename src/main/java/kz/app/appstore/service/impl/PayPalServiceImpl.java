@@ -11,6 +11,7 @@ import kz.app.appstore.dto.paypal.PayPalResponseDto;
 import kz.app.appstore.entity.*;
 import kz.app.appstore.enums.OrderStatus;
 import kz.app.appstore.enums.PaymentStatus;
+import kz.app.appstore.enums.TrackStatus;
 import kz.app.appstore.repository.OrderRepository;
 import kz.app.appstore.repository.PaymentRepository;
 import kz.app.appstore.repository.ProductRepository;
@@ -120,7 +121,8 @@ public class PayPalServiceImpl implements PayPalService {
                 kz.app.appstore.entity.Payment payment = paymentEntity.get();
                 payment.setStatus(PaymentStatus.PAID);
             }
-            order.setStatus(OrderStatus.CONFIRMED);
+            order.setTrackStatus(TrackStatus.NEW.name());
+            order.setPayStatus(OrderStatus.CONFIRMED);
             orderRepository.save(order);
         }
 
@@ -140,7 +142,7 @@ public class PayPalServiceImpl implements PayPalService {
                 kz.app.appstore.entity.Payment payment = paymentEntity.get();
                 payment.setStatus(PaymentStatus.FAILED);
             }
-            order.setStatus(OrderStatus.CANCELLED);
+            order.setPayStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
         }
     }
@@ -163,7 +165,7 @@ public class PayPalServiceImpl implements PayPalService {
         kz.app.appstore.entity.Order order = new kz.app.appstore.entity.Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus(OrderStatus.PENDING);
+        order.setPayStatus(OrderStatus.PENDING);
         order.setFirstname(request.getFirstname());
         order.setLastname(request.getLastname());
         order.setCountry(request.getCountry());

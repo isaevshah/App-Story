@@ -78,14 +78,14 @@ public class PayPalWebhookServiceImpl implements PayPalWebhookService {
             // 🧾 Обновим статус
             switch (eventType) {
 //                case "CHECKOUT.ORDER.SAVED" -> order.setStatus(OrderStatus.CREATED);
-                case "CHECKOUT.ORDER.APPROVED" -> order.setStatus(OrderStatus.CONFIRMED);
-                case "PAYMENT.CAPTURE.COMPLETED" -> order.setStatus(OrderStatus.DELIVERED);
-                case "PAYMENT.CAPTURE.DENIED" -> order.setStatus(OrderStatus.CANCELLED);
+                case "CHECKOUT.ORDER.APPROVED" -> order.setPayStatus(OrderStatus.CONFIRMED);
+                case "PAYMENT.CAPTURE.COMPLETED" -> order.setPayStatus(OrderStatus.DELIVERED);
+                case "PAYMENT.CAPTURE.DENIED" -> order.setPayStatus(OrderStatus.CANCELLED);
                 default -> log.info("Необработанный тип события: {}", eventType);
             }
 
             orderRepository.save(order);
-            log.info("✅ Вебхук обработан: заказ {} теперь со статусом {}", paypalOrderId, order.getStatus());
+            log.info("✅ Вебхук обработан: заказ {} теперь со статусом {}", paypalOrderId, order.getPayStatus());
             return ResponseEntity.ok("Webhook processed");
 
         } catch (Exception e) {

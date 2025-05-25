@@ -1,5 +1,4 @@
 package kz.app.appstore.entity;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import kz.app.appstore.enums.OrderStatus;
 import lombok.AllArgsConstructor;
@@ -20,7 +19,7 @@ public class Order {
     private Long id;
     private LocalDateTime orderDate;
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderStatus payStatus;
     private Double totalPrice;
     private String firstname;
     private String lastname;
@@ -29,6 +28,7 @@ public class Order {
     private String phoneNumber;
     private String point;
     private String orderCode;
+    private String trackStatus;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

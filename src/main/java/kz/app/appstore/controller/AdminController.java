@@ -49,14 +49,6 @@ public class AdminController {
         return adminService.getAllEmployees();
     }
 
-    @Operation(summary = "Получить все заказы", security = {@SecurityRequirement(name = "bearerAuth")})
-    @GetMapping("/orders/all")
-    public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
-        List<OrderResponseDto> orders = orderService.getAllOrders();
-        return ResponseEntity.ok(orders);
-    }
-
-
     @Operation(summary = "Обновление сотрудника", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/employee/{userId}/update")
     public ResponseEntity<?> updateEmployee(@PathVariable Long userId, @RequestBody AdminUserCreationDTO request) {

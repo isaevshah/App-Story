@@ -7,15 +7,15 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.catalog.*;
 import kz.app.appstore.dto.error.ErrorResponse;
+import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.dto.product.CreateProductRequest;
 import kz.app.appstore.dto.product.ProductResponse;
 import kz.app.appstore.dto.product.ProductResponseDTO;
 import kz.app.appstore.dto.product.UpdateProductRequest;
 import kz.app.appstore.exception.ProductCreationException;
+import kz.app.appstore.service.OrderService;
 import kz.app.appstore.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,8 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/manager")
@@ -35,10 +34,12 @@ import java.nio.file.Paths;
 public class ManagerController {
     private final ProductService productService;
     private final ObjectMapper objectMapper;
+    private final OrderService orderService;
 
-    public ManagerController(ProductService productService, ObjectMapper objectMapper) {
+    public ManagerController(ProductService productService, ObjectMapper objectMapper, OrderService orderService) {
         this.productService = productService;
         this.objectMapper = objectMapper;
+        this.orderService = orderService;
     }
 
     @Operation(summary = "Создание каталога", security = {@SecurityRequirement(name = "bearerAuth")})
@@ -125,6 +126,21 @@ public class ManagerController {
     public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
         productService.deleteProduct(productId);
         return ResponseEntity.ok("Product successfully deleted");
+    }
+
+    @Operation(summary = "Получить все заказы", security = {@SecurityRequirement(name = "bearerAuth")})
+    @GetMapping("/orders/all")
+    public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
+        List<OrderResponseDto> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
+    @Operation(summary = "Получить заказы по trackStatus", security = {@SecurityRequirement(name = "bearerAuth")})
+    @GetMapping("/orders/by-track-status")
+    Page<OrderResponseDto> getOrderByTrackStatus(@RequestParam(defaultValue = "0") int page,
+                                                 @RequestParam(defaultValue = "10") int size,
+                                                 @RequestParam String trackStatus) {
+        return orderService.getOrderByTrackStatus(page, size, trackStatus);
     }
 
 }

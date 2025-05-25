@@ -5,8 +5,14 @@ import kz.app.appstore.entity.*;
 import kz.app.appstore.repository.*;
 import kz.app.appstore.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,11 +32,23 @@ public class OrderServiceImpl implements OrderService {
         return orders.stream().map(this::mapToOrderResponseDto).collect(Collectors.toList());
     }
 
+    @Override
+    public Page<OrderResponseDto> getOrderByTrackStatus(int page, int size, String trackStatus) {
+        Pageable pageable = PageRequest.of(page, size);
+        String normalizedSearch = trackStatus.trim();
+        Page<Order> orderResult = orderRepository.findByTrackStatusContainingIgnoreCase(normalizedSearch, pageable);
+        if (orderResult.hasContent()) {
+            return orderResult.map(this::mapToOrderResponseDto);
+        }
+        return new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+    }
+
     private OrderResponseDto mapToOrderResponseDto(Order order) {
         return new OrderResponseDto(
                 order.getId(),
                 order.getOrderDate(),
-                order.getStatus().name(),
+                order.getPayStatus().name(),
                 order.getTotalPrice(),
                 order.getFirstname(),
                 order.getLastname(),
