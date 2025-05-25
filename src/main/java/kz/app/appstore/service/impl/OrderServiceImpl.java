@@ -5,10 +5,7 @@ import kz.app.appstore.entity.*;
 import kz.app.appstore.repository.*;
 import kz.app.appstore.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +24,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderResponseDto> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
-        return orders.stream().map(this::mapToOrderResponseDto).collect(Collectors.toList());
+    public Page<OrderResponseDto> getAllOrders(int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
+        Page<Order> orders = orderRepository.findAll(pageable);
+        return orders.map(this::mapToOrderResponseDto);
     }
 
     @Override

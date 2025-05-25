@@ -130,9 +130,9 @@ public class ManagerController {
 
     @Operation(summary = "Получить все заказы", security = {@SecurityRequirement(name = "bearerAuth")})
     @GetMapping("/orders/all")
-    public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
-        List<OrderResponseDto> orders = orderService.getAllOrders();
-        return ResponseEntity.ok(orders);
+    public Page<OrderResponseDto> getAllOrders(@RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(defaultValue = "10") int size) {
+        return orderService.getAllOrders(page, size);
     }
 
     @Operation(summary = "Получить заказы по trackStatus", security = {@SecurityRequirement(name = "bearerAuth")})
