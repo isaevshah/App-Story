@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +41,17 @@ public class OrderServiceImpl implements OrderService {
         }
         return new PageImpl<>(Collections.emptyList(), pageable, 0);
 
+    }
+
+    @Override
+    public void updateTrackStatus(Long id, String trackStatus) {
+        log.info("Got track status update for order id {}", id);
+        Optional<Order> optionalOrder = orderRepository.findById(id);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+            order.setTrackStatus(trackStatus);
+            orderRepository.save(order);
+        }
     }
 
     private OrderResponseDto mapToOrderResponseDto(Order order) {

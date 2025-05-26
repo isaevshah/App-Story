@@ -143,4 +143,9 @@ public class ManagerController {
         return orderService.getOrderByTrackStatus(page, size, trackStatus);
     }
 
+    @Operation(summary = "Изменить trackStatus заказа", security = {@SecurityRequirement(name = "bearerAuth")})
+    @GetMapping("/update/track-status/{id}")
+    public void updateTrackStatus(@PathVariable Long id, @RequestParam String trackStatus) {
+        orderService.updateTrackStatus(id, trackStatus);
+    }
 }
