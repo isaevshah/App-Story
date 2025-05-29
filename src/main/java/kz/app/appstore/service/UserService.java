@@ -55,13 +55,20 @@ public class UserService {
     public UserInfoDto getUserInfo(String username){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return UserInfoDto.builder()
-                .firstname(user.getProfile().getFirstName())
-                .lastname(user.getProfile().getLastName())
-                .phoneNumber(user.getProfile().getPhoneNumber())
-                .bin(user.getProfile().getBin())
-                .companyName(user.getProfile().getCompanyName())
-                .build();
+
+        Profile profile = user.getProfile();
+
+        return new UserInfoDto(
+                user.getUsername(),
+                profile.getFirstName(),
+                profile.getLastName(),
+                profile.getPhoneNumber(),
+                profile.getBin(),
+                profile.getCompanyName(),
+                user.getRole(),
+                user.getUserType(),
+                user.isActive()
+        );
     }
 }
 

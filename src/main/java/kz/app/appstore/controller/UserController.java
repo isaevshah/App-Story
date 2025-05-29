@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 @Slf4j
-@PreAuthorize(value = "hasAnyRole('MANAGER', 'ADMIN', 'CUSTOMER')")
+@PreAuthorize(value = "hasAnyRole('ADMIN', 'CUSTOMER')")
 @RequiredArgsConstructor
 public class UserController {
     private final CartService cartService;
@@ -119,4 +119,5 @@ public class UserController {
         String username = auth.getName();
         return userService.getUserInfo(username);
     }
+
 }
