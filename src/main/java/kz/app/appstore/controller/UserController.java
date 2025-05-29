@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.cart.CartItemResponse;
+import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.dto.product.FavoriteProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.dto.user.UserInfoDto;
@@ -120,4 +121,11 @@ public class UserController {
         return userService.getUserInfo(username);
     }
 
+    @Operation(summary = "Заказы пользователя", security = {@SecurityRequirement(name = "bearerAuth")})
+    @GetMapping("/user-orders")
+    public List<OrderResponseDto> getUserOrders() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return userService.getUserOrders(username);
+    }
 }
