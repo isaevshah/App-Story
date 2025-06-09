@@ -1,6 +1,7 @@
 package kz.app.appstore.service;
 
 // UserService.java
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import kz.app.appstore.dto.auth.UserRegistrationDTO;
 import kz.app.appstore.dto.order.OrderItemDto;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,6 +82,13 @@ public class UserService {
                 user.isActive()
         );
     }
+
+    public OrderResponseDto getUserOrderById(Long id) {
+        return orderRepository.findById(id)
+                .map(this::mapToOrderResponseDto)
+                .orElseThrow(() -> new EntityNotFoundException("Order with id " + id + " not found"));
+    }
+
 
     public List<OrderResponseDto> getUserOrders(String username){
         User user = userRepository.findByUsername(username)

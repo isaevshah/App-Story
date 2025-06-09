@@ -128,4 +128,10 @@ public class UserController {
         String username = auth.getName();
         return userService.getUserOrders(username);
     }
+
+    @Operation(summary = "Заказы пользователя", security = {@SecurityRequirement(name = "bearerAuth")})
+    @GetMapping("/user-order/{id}")
+    public OrderResponseDto getUserOrderById(@PathVariable Long id) {
+        return userService.getUserOrderById(id);
+    }
 }
