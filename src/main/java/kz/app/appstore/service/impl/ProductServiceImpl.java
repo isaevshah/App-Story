@@ -322,7 +322,9 @@ public class ProductServiceImpl implements ProductService {
         catalog.setDescription(catalogRequest.getDescription());
         catalog.setUpdatedBy(username);
         catalog.setUpdatedAt(LocalDateTime.now());
-        catalog.setImageName(saveImageFile(catalogRequest.getImage()));
+        if (catalogRequest.getImage() != null) {
+            catalog.setImageName(saveImageFile(catalogRequest.getImage()));
+        }
         catalogRepository.save(catalog);
     }
 
