@@ -19,7 +19,7 @@ public class PayPalConfig {
 
     @Bean
     public PayPalHttpClient payPalHttpClient() {
-        PayPalEnvironment environment = mode.equals("live")
+        PayPalEnvironment environment = mode.equals("sandbox")
                 ? new PayPalEnvironment.Sandbox(clientId, clientSecret)
                 : new PayPalEnvironment.Live(clientId, clientSecret);
         return new PayPalHttpClient(environment);
