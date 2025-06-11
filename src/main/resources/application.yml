@@ -16,9 +16,11 @@ spring:
       max-file-size: 3MB
 paypal:
   client:
-    id: AfQySflty7K-ye9gwxO-23vZXSls0_cz1pvR-rGeX2H1rhi1HTUF6NoTdqaQPSETFipm4u-00gg8xcvQ
-    secret: ELy30fKAvTUyjYxlX6ZQXYmk2Ef7u4sm6JgXpKUCcmHChbzKPyHlj0WMD74FNrFwZrSBGm25T5V4kYRo
-  mode: sandbox
+#    id: AfQySflty7K-ye9gwxO-23vZXSls0_cz1pvR-rGeX2H1rhi1HTUF6NoTdqaQPSETFipm4u-00gg8xcvQ
+#    secret: ELy30fKAvTUyjYxlX6ZQXYmk2Ef7u4sm6JgXpKUCcmHChbzKPyHlj0WMD74FNrFwZrSBGm25T5V4kYRo
+    id: AdCM-yFy5c67JYLceDAdy2uoqaDuqf1iBPDNAGqHWmeNJNc_GYGlyL6MCY8EIifItsmAUAVcyEqF8Dk3
+    secret: EDuOIusyGGE4Ew84XxM8GawUVZkWGqg2wMZeeIhKVnOayTVY0fJSsN8LRYJeVlQFdOIxz6Au6gJoYtya
+  mode: live
   return-url: https://app-store-murex.vercel.app/payment/success
   cancel-url: https://app-store-murex.vercel.app/payment/cancel
   webhook-id: 7R026524EA328190C
