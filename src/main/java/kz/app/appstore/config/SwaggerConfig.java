@@ -21,7 +21,7 @@ public class SwaggerConfig {
                         .version("0.0.1")
                         .contact(new Contact()
                                 .name("Shahruh Isaev")
-                                .email("shahruhi@bankffin.kz")))
+                                .email("isaevshahruh2001@gmail.com")))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth")) // ⬅️ Добавляем секьюрность
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth",
