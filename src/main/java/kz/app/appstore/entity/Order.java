@@ -1,6 +1,6 @@
 package kz.app.appstore.entity;
 import jakarta.persistence.*;
-import kz.app.appstore.enums.OrderStatus;
+import kz.app.appstore.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ public class Order {
     private Long id;
     private LocalDateTime orderDate;
     @Enumerated(EnumType.STRING)
-    private OrderStatus payStatus;
+    private PaymentStatus payStatus;
     private Double totalPrice;
     private String firstname;
     private String lastname;
@@ -34,4 +34,7 @@ public class Order {
     private User user;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;
+
+    @Column(name = "kaspi_check_path")
+    private String kaspiCheckPath;
 }

@@ -1,8 +1,7 @@
 package kz.app.appstore.enums;
 
 public enum PaymentStatus {
-    PENDING,
-    PAID,
+    WAITING_CONFIRMATION,
     FAILED,
     APPROVED
 }

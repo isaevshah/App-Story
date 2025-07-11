@@ -15,7 +15,7 @@ spring:
     multipart:
       max-file-size: 3MB
 upload:
-  path: /data/uploads #/Users/shahruhisaev/Documents/appstoryimages #
+  path: /Users/shahruhisaev/Documents/appstoryimages #/data/uploads #
 springdoc:
   api-docs:
     enabled: true

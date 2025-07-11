@@ -4,22 +4,27 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.cart.CartItemResponse;
+import kz.app.appstore.dto.order.OrderRequestDto;
 import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.dto.product.FavoriteProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.dto.user.UserInfoDto;
 import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.service.CartService;
+import kz.app.appstore.service.CreateOrderService;
 import kz.app.appstore.service.FavoriteService;
 import kz.app.appstore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -31,6 +36,7 @@ public class UserController {
     private final CartService cartService;
     private final FavoriteService favoriteService;
     private final UserService userService;
+    private final CreateOrderService createOrderService;
 
     @Operation(summary = "Добавить товар в корзинку", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/cart/cart-item/{productId}/{quantity}/create")
@@ -133,5 +139,17 @@ public class UserController {
     @GetMapping("/user-order/{id}")
     public OrderResponseDto getUserOrderById(@PathVariable Long id) {
         return userService.getUserOrderById(id);
+    }
+
+    @PostMapping(value = "/create-order", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void createOrder(@RequestPart("data") OrderRequestDto request,
+                            @RequestPart("file") MultipartFile file) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String username = auth.getName();
+            createOrderService.saveKaspiCheck(request,username,file);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 }
