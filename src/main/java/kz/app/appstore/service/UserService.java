@@ -115,6 +115,7 @@ public class UserService {
                 order.getCountry(),
                 order.getPoint(),
                 order.getUser().getUsername(),
+                order.getKaspiCheckPath(),
                 order.getOrderItems().stream().map(this::mapToOrderItemDto).collect(Collectors.toList())
         );
     }
