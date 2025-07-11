@@ -23,5 +23,6 @@ public class OrderResponseDto {
     private String country;
     private String point;
     private String username;
+    private String fileName;
     private List<OrderItemDto> items;
 }
