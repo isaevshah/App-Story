@@ -22,4 +22,6 @@ public class ProductResponse {
     private Map<String, Object> specificParams;
     private List<String> imageUrls;
     private Boolean isDeleted;
+    private Boolean inCart;
+    private Boolean isFavorite;
 }

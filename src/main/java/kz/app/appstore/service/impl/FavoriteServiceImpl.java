@@ -9,6 +9,7 @@ import kz.app.appstore.entity.Favorite;
 import kz.app.appstore.entity.Product;
 import kz.app.appstore.entity.ProductImage;
 import kz.app.appstore.entity.User;
+import kz.app.appstore.repository.CartItemRepository;
 import kz.app.appstore.repository.FavoriteRepository;
 import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.repository.UserRepository;
@@ -29,11 +30,13 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public FavoriteServiceImpl(FavoriteRepository favoriteRepository, ProductRepository productRepository, UserRepository userRepository) {
+    public FavoriteServiceImpl(FavoriteRepository favoriteRepository, ProductRepository productRepository, UserRepository userRepository, CartItemRepository cartItemRepository) {
         this.favoriteRepository = favoriteRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     @Override
@@ -45,6 +48,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         if (favoriteRepository.existsByUserIdAndProductId(user.getId(), productId)) {
             throw new IllegalArgumentException("Product is already in the user's favorites.");
         }
+
         Favorite favorite = new Favorite();
         favorite.setUser(user);
         favorite.setProduct(product);
@@ -92,6 +96,9 @@ public class FavoriteServiceImpl implements FavoriteService {
                 .map(ProductImage::getImageUrl) // Генерация полного URL
                 .collect(Collectors.toList());
 
+        Boolean inCart = cartItemRepository.existsByProductId(product.getId());
+        Boolean isFavorite = favoriteRepository.existsByProductId(product.getId());
+
         return new ProductResponse(
                 product.getId(),
                 product.getCatalog().getName(),
@@ -103,7 +110,9 @@ public class FavoriteServiceImpl implements FavoriteService {
                 product.getIsHotProduct(),
                 specificParams,
                 imageUrls,
-                product.getIsDeleted()
+                product.getIsDeleted(),
+                inCart,
+                isFavorite
         );
     }
 }

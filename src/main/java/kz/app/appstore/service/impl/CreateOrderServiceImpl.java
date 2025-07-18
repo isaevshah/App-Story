@@ -56,6 +56,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
             orderEntity.setOrderItems(orderItems);
             orderEntity.setOrderCode(String.valueOf(UUID.randomUUID()));
             orderEntity.setTotalPrice(totalPrice);
+            orderEntity.setCreateDate(LocalDateTime.now());
             orderRepository.save(orderEntity);
             createPaymentRecord(orderEntity, request.getPaymentMethod());
         } catch (Exception e) {

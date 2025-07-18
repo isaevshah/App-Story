@@ -29,6 +29,7 @@ public class Order {
     private String point;
     private String orderCode;
     private String trackStatus;
+    private LocalDateTime createDate;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

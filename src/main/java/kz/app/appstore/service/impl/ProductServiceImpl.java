@@ -12,7 +12,6 @@ import kz.app.appstore.entity.*;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.repository.*;
 import kz.app.appstore.service.ProductService;
-import kz.app.appstore.service.UserService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,16 +40,18 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CatalogRepository catalogRepository;
     private final ObjectMapper objectMapper;
-    private final UserService userService;
+    private final FavoriteRepository favoriteRepository;
+    private final CartItemRepository cartItemRepository;
 
     @Value("${upload.path}")
     private String uploadPath;
 
-    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper, UserService userService) {
+    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper, FavoriteRepository favoriteRepository, CartItemRepository cartItemRepository) {
         this.productRepository = productRepository;
         this.catalogRepository = catalogRepository;
         this.objectMapper = objectMapper;
-        this.userService = userService;
+        this.favoriteRepository = favoriteRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     @SneakyThrows
@@ -349,6 +350,9 @@ public class ProductServiceImpl implements ProductService {
                 .map(ProductImage::getImageUrl) // Генерация полного URL
                 .collect(Collectors.toList());
 
+        Boolean inCart = cartItemRepository.existsByProductId(product.getId());
+        Boolean isFavorite = favoriteRepository.existsByProductId(product.getId());
+
         return new ProductResponse(
                 product.getId(),
                 product.getCatalog().getName(),
@@ -360,7 +364,9 @@ public class ProductServiceImpl implements ProductService {
                 product.getIsHotProduct(),
                 specificParams,
                 imageUrls,
-                product.getIsDeleted()
+                product.getIsDeleted(),
+                inCart,
+                isFavorite
         );
     }
 

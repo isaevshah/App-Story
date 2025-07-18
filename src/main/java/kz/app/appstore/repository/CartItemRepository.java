@@ -5,5 +5,5 @@ import kz.app.appstore.entity.CartItemKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CartItemRepository extends JpaRepository<CartItem, CartItemKey> {
-
+    boolean existsByProductId(Long productId);
 }
