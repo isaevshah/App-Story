@@ -21,6 +21,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,16 +45,18 @@ public class ProductServiceImpl implements ProductService {
     private final ObjectMapper objectMapper;
     private final FavoriteRepository favoriteRepository;
     private final CartItemRepository cartItemRepository;
+    private final UserRepository userRepository;
 
     @Value("${upload.path}")
     private String uploadPath;
 
-    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper, FavoriteRepository favoriteRepository, CartItemRepository cartItemRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, CatalogRepository catalogRepository, ObjectMapper objectMapper, FavoriteRepository favoriteRepository, CartItemRepository cartItemRepository, UserRepository userRepository) {
         this.productRepository = productRepository;
         this.catalogRepository = catalogRepository;
         this.objectMapper = objectMapper;
         this.favoriteRepository = favoriteRepository;
         this.cartItemRepository = cartItemRepository;
+        this.userRepository = userRepository;
     }
 
     @SneakyThrows
@@ -253,12 +258,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getLikedProducts() {
-        return List.of();
-    }
-
-    @Override
-    public ProductResponse getProductById(Long id) {
+    public ProductResponse getProductById(String username, Long id) {
         Product product = productRepository.findById(id).orElseThrow();
         return convertToProductResponse(product);
     }
@@ -350,9 +350,6 @@ public class ProductServiceImpl implements ProductService {
                 .map(ProductImage::getImageUrl) // Генерация полного URL
                 .collect(Collectors.toList());
 
-        Boolean inCart = cartItemRepository.existsByProductId(product.getId());
-        Boolean isFavorite = favoriteRepository.existsByProductId(product.getId());
-
         return new ProductResponse(
                 product.getId(),
                 product.getCatalog().getName(),
@@ -365,9 +362,23 @@ public class ProductServiceImpl implements ProductService {
                 specificParams,
                 imageUrls,
                 product.getIsDeleted(),
-                inCart,
-                isFavorite
+                exist(product.getId()).get("inCart"),
+                exist(product.getId()).get("isFavorite")
         );
+    }
+
+    public Map<String, Boolean> exist(Long productId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        Boolean inCart = cartItemRepository.existsByCartIdAndProductId(user.getId(), productId);
+        Boolean isFavorite = favoriteRepository.existsByUserIdAndProductId(user.getId(), productId);
+        Map<String, Boolean> exist = new HashMap<>();
+        exist.put("inCart", inCart);
+        exist.put("isFavorite", isFavorite);
+        return exist;
     }
 
     public CatalogResponse toCatalogResponse(Catalog catalog, boolean includeParent, boolean includeImage) {

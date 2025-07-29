@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
@@ -98,7 +100,9 @@ public class PublicController {
     @Operation(summary = "Получение продукта по id")
     @GetMapping("/product/{id}")
     public ProductResponse getProductById(@PathVariable Long id) {
-        return productService.getProductById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        return productService.getProductById(username,id);
     }
 
     @Operation(summary = "Получение всех под каталогов по айди каталога")

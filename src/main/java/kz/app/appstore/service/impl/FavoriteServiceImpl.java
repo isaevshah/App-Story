@@ -15,6 +15,9 @@ import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.FavoriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,9 +99,6 @@ public class FavoriteServiceImpl implements FavoriteService {
                 .map(ProductImage::getImageUrl) // Генерация полного URL
                 .collect(Collectors.toList());
 
-        Boolean inCart = cartItemRepository.existsByProductId(product.getId());
-        Boolean isFavorite = favoriteRepository.existsByProductId(product.getId());
-
         return new ProductResponse(
                 product.getId(),
                 product.getCatalog().getName(),
@@ -111,8 +111,22 @@ public class FavoriteServiceImpl implements FavoriteService {
                 specificParams,
                 imageUrls,
                 product.getIsDeleted(),
-                inCart,
-                isFavorite
+                exist(product.getId()).get("inCart"),
+                exist(product.getId()).get("isFavorite")
         );
+    }
+
+    public Map<String, Boolean> exist(Long productId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        Boolean inCart = cartItemRepository.existsByCartIdAndProductId(user.getId(), productId);
+        Boolean isFavorite = favoriteRepository.existsByUserIdAndProductId(user.getId(), productId);
+        Map<String, Boolean> exist = new HashMap<>();
+        exist.put("inCart", inCart);
+        exist.put("isFavorite", isFavorite);
+        return exist;
     }
 }
