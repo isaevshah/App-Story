@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import kz.app.appstore.dto.cart.CartItemResponse;
 import kz.app.appstore.entity.*;
+import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.repository.CartItemRepository;
 import kz.app.appstore.repository.CartRepository;
 import kz.app.appstore.repository.ProductRepository;
@@ -51,6 +52,35 @@ public class CartServiceImpl implements CartService {
         updateCartTotalPrice(cart);
         log.info("Added product {} to cart for user {}", productId, username);
     }
+
+    @Override
+    @Transactional
+    public void updateCartItem(Long productId, String username, int quantity) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
+
+        Cart cart = getOrCreateCart(user);
+
+        CartItem cartItem = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(product.getId()))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Product not found in cart"));
+
+        // Проверка на количество (например, чтобы не превысить остаток)
+        if (product.getQuantity() < quantity) {
+            throw new InsufficientStockException("Недостаточно товара на складе");
+        }
+
+        cartItem.setQuantity(quantity);
+        cartItem.setPrice(product.getPrice() * quantity);
+        cartItemRepository.save(cartItem);
+
+        updateCartTotalPrice(cart);
+    }
+
 
     @Override
     @Transactional

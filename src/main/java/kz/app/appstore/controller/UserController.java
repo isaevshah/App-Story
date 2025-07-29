@@ -54,6 +54,22 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Обновить количество товара в корзине", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PutMapping("/cart/cart-item/{productId}/{quantity}/update")
+    public ResponseEntity<?> updateCartItem(@PathVariable Long productId, @PathVariable int quantity) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        try {
+            cartService.updateCartItem(productId, username, quantity);
+            return ResponseEntity.ok("Product quantity updated successfully");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (InsufficientStockException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+
     @Operation(summary = "Удалить товар из корзины", security = {@SecurityRequirement(name = "bearerAuth")})
     @DeleteMapping("/cart/cart-item/{productId}/delete")
     public ResponseEntity<?> deleteCartItem(@PathVariable Long productId) {
