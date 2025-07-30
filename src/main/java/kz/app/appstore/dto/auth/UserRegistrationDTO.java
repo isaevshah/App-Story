@@ -24,6 +24,8 @@ public class UserRegistrationDTO {
     private String phoneNumber;
     @NotBlank
     private UserType userType; // Тип пользователя: Физическое или Юридическое лицо
+
+    private String email;
     // Поля для Юридического лица
     private String firstName; // Имя (только для Юр-лица)
     private String lastName; // Фамилия (только для Юр-лица)

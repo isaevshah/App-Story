@@ -1,29 +1,30 @@
 package kz.app.appstore.service;
 
-// UserService.java
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
+import kz.app.appstore.dto.auth.OtpVerificationDTO;
 import kz.app.appstore.dto.auth.UserRegistrationDTO;
 import kz.app.appstore.dto.order.OrderItemDto;
 import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.dto.user.UserInfoDto;
-import kz.app.appstore.entity.Order;
-import kz.app.appstore.entity.OrderItem;
-import kz.app.appstore.entity.Profile;
-import kz.app.appstore.entity.User;
+import kz.app.appstore.entity.*;
 import kz.app.appstore.enums.Role;
 import kz.app.appstore.enums.UserType;
 import kz.app.appstore.repository.OrderRepository;
 import kz.app.appstore.repository.UserRepository;
+import kz.app.appstore.repository.VerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,13 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private VerificationRepository verificationRepository;
 
     public void registerUser(UserRegistrationDTO registrationDTO) throws Exception {
         // Проверяем, существует ли пользователь
@@ -63,6 +71,55 @@ public class UserService {
 
         userRepository.save(user);
     }
+
+    @Transactional
+    public void verifyAndRegister(OtpVerificationDTO dto) throws Exception {
+        RegistrationVerification verification = verificationRepository.findById(dto.getEmail())
+                .orElseThrow(() -> new RuntimeException("No OTP request found"));
+
+        if (!verification.getOtp().equals(dto.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("OTP expired");
+        }
+
+        if (verification.isVerified()) {
+            throw new RuntimeException("OTP already used");
+        }
+
+        UserRegistrationDTO registrationDTO =
+                objectMapper.readValue(verification.getPayloadJson(), UserRegistrationDTO.class);
+
+        registerUser(registrationDTO); // твой метод регистрации
+        verification.setVerified(true);
+        verificationRepository.save(verification);
+    }
+
+
+    public void initiateRegistration(UserRegistrationDTO dto) throws JsonProcessingException {
+        String otp = generateOtp();
+        String json = objectMapper.writeValueAsString(dto);
+
+        RegistrationVerification entity = new RegistrationVerification();
+        entity.setEmail(dto.getEmail());
+        entity.setOtp(otp);
+        entity.setPayloadJson(json);
+        entity.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+        entity.setVerified(false);
+
+        verificationRepository.save(entity);
+        emailService.sendOtpEmail(dto.getEmail(), otp);
+    }
+
+    public String generateOtp() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000); // диапазон 100000–999999
+        return String.valueOf(otp);
+    }
+
+
 
     public UserInfoDto getUserInfo(String username){
         User user = userRepository.findByUsername(username)

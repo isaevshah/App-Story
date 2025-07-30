@@ -1,12 +1,10 @@
 package kz.app.appstore.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import kz.app.appstore.config.JwtUtil;
-import kz.app.appstore.dto.auth.AuthResponseDto;
-import kz.app.appstore.dto.auth.LoginRequestDto;
-import kz.app.appstore.dto.auth.RefreshTokenRequestDto;
-import kz.app.appstore.dto.auth.UserRegistrationDTO;
+import kz.app.appstore.dto.auth.*;
 import kz.app.appstore.service.UserService;
 import kz.app.appstore.service.impl.UserDetailsServiceImpl;
 import org.springframework.security.core.AuthenticationException;
@@ -31,6 +29,18 @@ public class AuthController {
     private UserDetailsServiceImpl userDetailsService;
     @Autowired
     private UserService userService;
+
+    @PostMapping("/register/request")
+    public ResponseEntity<?> requestRegistration(@RequestBody UserRegistrationDTO dto) throws JsonProcessingException {
+        userService.initiateRegistration(dto);
+        return ResponseEntity.ok("OTP sent to email");
+    }
+
+    @PostMapping("/register/verify")
+    public ResponseEntity<?> verifyOtpAndRegister(@RequestBody OtpVerificationDTO dto) throws Exception {
+        userService.verifyAndRegister(dto);
+        return ResponseEntity.ok("User registered successfully");
+    }
 
     @Operation(summary = "Регистрация", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping("/register")

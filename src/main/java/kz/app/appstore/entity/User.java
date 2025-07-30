@@ -25,6 +25,7 @@ public class User {
     private String updatedBy;
     private LocalDateTime registrationAt;
     private LocalDateTime updatedAt;
+    private String email;
     @Enumerated(EnumType.STRING)
     private Role role;
     @Enumerated(EnumType.STRING)
