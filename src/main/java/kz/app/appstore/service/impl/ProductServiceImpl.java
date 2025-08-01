@@ -368,16 +368,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Map<String, Boolean> exist(Long productId) {
+        Map<String, Boolean> exist = new HashMap<>();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        if (!username.equals("anonymousUser")) {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        Boolean inCart = cartItemRepository.existsByCartIdAndProductId(user.getId(), productId);
-        Boolean isFavorite = favoriteRepository.existsByUserIdAndProductId(user.getId(), productId);
-        Map<String, Boolean> exist = new HashMap<>();
-        exist.put("inCart", inCart);
-        exist.put("isFavorite", isFavorite);
+            Boolean inCart = cartItemRepository.existsByCartIdAndProductId(user.getId(), productId);
+            Boolean isFavorite = favoriteRepository.existsByUserIdAndProductId(user.getId(), productId);
+            exist.put("inCart", inCart);
+            exist.put("isFavorite", isFavorite);
+        } else {
+            exist.put("inCart", false);
+            exist.put("isFavorite", false);
+        }
         return exist;
     }
 
