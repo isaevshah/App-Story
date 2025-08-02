@@ -38,26 +38,19 @@ public class AuthController {
 
     @PostMapping("/register/verify")
     public ResponseEntity<?> verifyOtpAndRegister(@RequestBody OtpVerificationDTO dto) throws Exception {
-        userService.verifyAndRegister(dto);
-        return ResponseEntity.ok("User registered successfully");
-    }
-
-    @Operation(summary = "Регистрация", security = {@SecurityRequirement(name = "bearerAuth")})
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegistrationDTO registrationDTO) {
         try {
-            userService.registerUser(registrationDTO);
+            userService.verifyAndRegister(dto);
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            registrationDTO.getUsername(),
-                            registrationDTO.getPassword()
+                            dto.getUsername(),
+                            dto.getPassword()
                     )
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String accessToken = jwtUtil.generateAccessToken(userDetails);
             String refreshToken = jwtUtil.generateRefreshToken(userDetails);
             return ResponseEntity.ok(new AuthResponseDto(accessToken, refreshToken));
-        } catch (Exception e) { // Добавить ValidationException, UserAlreadyExistsException
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }

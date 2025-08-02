@@ -9,6 +9,7 @@ import kz.app.appstore.repository.OrderRepository;
 import kz.app.appstore.repository.PaymentRepository;
 import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.repository.UserRepository;
+import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.CreateOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,16 +35,18 @@ public class CreateOrderServiceImpl implements CreateOrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
+    private final CartService cartService;
 
-    public CreateOrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, PaymentRepository paymentRepository) {
+    public CreateOrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository, PaymentRepository paymentRepository, CartService cartService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.paymentRepository = paymentRepository;
+        this.cartService = cartService;
     }
 
     @Override
-    public void saveKaspiCheck(OrderRequestDto request, String username, MultipartFile file) throws IOException {
+    public void saveKaspiCheck(OrderRequestDto request, String username, MultipartFile file) {
         if (!file.getOriginalFilename().endsWith(".pdf")) {
             throw new IllegalArgumentException("Файл должен быть в формате PDF");
         }
@@ -59,10 +62,17 @@ public class CreateOrderServiceImpl implements CreateOrderService {
             orderEntity.setCreateDate(LocalDateTime.now());
             orderRepository.save(orderEntity);
             createPaymentRecord(orderEntity, request.getPaymentMethod());
+            deleteCartItem(request, username);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
 
+    }
+
+    private void deleteCartItem(OrderRequestDto request, String username) {
+        for (OrderItemRequestDto itemRequest : request.getItems()) {
+            cartService.removeFromCart(itemRequest.getProductId(), username);
+        }
     }
 
     private String savePdfFile(MultipartFile file) throws IOException {
@@ -79,7 +89,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
     private kz.app.appstore.entity.Order createOrderEntity(OrderRequestDto request, User user, MultipartFile file) throws IOException {
         kz.app.appstore.entity.Order order = new kz.app.appstore.entity.Order();
         order.setUser(user);
-        order.setOrderDate(LocalDateTime.now());
+        order.setCreateDate(LocalDateTime.now());
         order.setPayStatus(PaymentStatus.WAITING_CONFIRMATION);
         order.setTrackStatus(TrackStatus.PENDING.name());
         order.setFirstname(request.getFirstname());

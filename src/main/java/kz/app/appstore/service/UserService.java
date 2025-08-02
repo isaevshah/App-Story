@@ -9,6 +9,7 @@ import kz.app.appstore.dto.auth.UserRegistrationDTO;
 import kz.app.appstore.dto.order.OrderItemDto;
 import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.dto.user.UserInfoDto;
+import kz.app.appstore.dto.user.UserUpdateDto;
 import kz.app.appstore.entity.*;
 import kz.app.appstore.enums.Role;
 import kz.app.appstore.enums.UserType;
@@ -55,6 +56,7 @@ public class UserService {
         user.setRole(Role.CUSTOMER);
         user.setRegistrationAt(LocalDateTime.now());
         user.setUserType(registrationDTO.getUserType());
+        user.setEmail(registrationDTO.getEmail());
         user.setActive(true);
 
         // Установка дополнительных полей в зависимости от UserType
@@ -92,13 +94,62 @@ public class UserService {
         UserRegistrationDTO registrationDTO =
                 objectMapper.readValue(verification.getPayloadJson(), UserRegistrationDTO.class);
 
-        registerUser(registrationDTO); // твой метод регистрации
+        registerUser(registrationDTO);
         verification.setVerified(true);
         verificationRepository.save(verification);
     }
 
+    public void updateProfile(UserUpdateDto dto, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
+            user.setUsername(dto.getUsername());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            user.setEmail(dto.getEmail());
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        Profile profile = user.getProfile();
+
+        if (dto.getFirstName() != null) {
+            profile.setFirstName(dto.getFirstName());
+        }
+        if (dto.getLastName() != null) {
+            profile.setLastName(dto.getLastName());
+        }
+        if (dto.getPhoneNumber() != null) {
+            profile.setPhoneNumber(dto.getPhoneNumber());
+        }
+
+        user.setProfile(profile);
+        profile.setUser(user);
+
+        userRepository.save(user);
+    }
 
     public void initiateRegistration(UserRegistrationDTO dto) throws JsonProcessingException {
+        // Проверка на уникальность username
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new ValidationException("Пользователь с таким username уже существует");
+        }
+
+        // Проверка на уникальность email (если он заполнен)
+        if (dto.getEmail() != null && userRepository.existsByEmail(dto.getEmail())) {
+            throw new ValidationException("Пользователь с таким email уже существует");
+        }
+
+        // Проверка на уникальность номера телефона
+        if (userRepository.existsByProfilePhoneNumber(dto.getPhoneNumber())) {
+            throw new ValidationException("Пользователь с таким номером телефона уже существует");
+        }
+
+        // Генерация OTP и сохранение запроса
         String otp = generateOtp();
         String json = objectMapper.writeValueAsString(dto);
 
@@ -113,6 +164,7 @@ public class UserService {
         emailService.sendOtpEmail(dto.getEmail(), otp);
     }
 
+
     public String generateOtp() {
         Random random = new Random();
         int otp = 100000 + random.nextInt(900000); // диапазон 100000–999999
@@ -120,8 +172,7 @@ public class UserService {
     }
 
 
-
-    public UserInfoDto getUserInfo(String username){
+    public UserInfoDto getUserInfo(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -147,12 +198,12 @@ public class UserService {
     }
 
 
-    public List<OrderResponseDto> getUserOrders(String username){
+    public List<OrderResponseDto> getUserOrders(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         List<Order> getUserOrders = orderRepository.findOrdersByUserId(user.getId());
-        if(getUserOrders.isEmpty()){
+        if (getUserOrders.isEmpty()) {
             throw new NoSuchElementException("User not found");
         }
         return getUserOrders.stream().map(this::mapToOrderResponseDto).toList();
@@ -161,7 +212,7 @@ public class UserService {
     private OrderResponseDto mapToOrderResponseDto(Order order) {
         return new OrderResponseDto(
                 order.getId(),
-                order.getOrderDate(),
+                order.getCreateDate(),
                 order.getPayStatus().name(),
                 order.getTrackStatus(),
                 order.getTotalPrice(),
@@ -173,6 +224,7 @@ public class UserService {
                 order.getPoint(),
                 order.getUser().getUsername(),
                 order.getKaspiCheckPath(),
+                order.getUser().getEmail(),
                 order.getOrderItems().stream().map(this::mapToOrderItemDto).collect(Collectors.toList())
         );
     }

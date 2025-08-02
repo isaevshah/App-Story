@@ -11,4 +11,6 @@ public interface CatalogRepository extends JpaRepository<Catalog, Long> {
     @Query("SELECT c FROM Catalog c WHERE c.parentCatalog.id = :parentCatalogId")
     List<Catalog> findByParentCatalogId(@Param("parentCatalogId") Long parentCatalogId);
 
+    @Query("SELECT c FROM Catalog c WHERE LOWER(c.name) LIKE %:query%")
+    List<Catalog> searchByName(@Param("query") String query);
 }

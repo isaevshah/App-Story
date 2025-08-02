@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import kz.app.appstore.dto.catalog.CatalogResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.dto.product.ProductResponse;
+import kz.app.appstore.dto.search.SearchResponse;
 import kz.app.appstore.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,7 +103,7 @@ public class PublicController {
     public ProductResponse getProductById(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        return productService.getProductById(username,id);
+        return productService.getProductById(username, id);
     }
 
     @Operation(summary = "Получение всех под каталогов по айди каталога")
@@ -132,6 +133,12 @@ public class PublicController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Internal server error"));
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<SearchResponse> search(@RequestParam String query) {
+        SearchResponse response = productService.searchAll(query);
+        return ResponseEntity.ok(response);
     }
 
 

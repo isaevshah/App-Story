@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface AdminService {
     void createManager(AdminUserCreationDTO userRegistrationDTO, String adminUsername);
+
     void deleteManager(Long id);
-    void updateEmployee(Long userId,AdminUserCreationDTO userRegistrationDTO, String adminUsername);
+
+    void updateEmployee(Long userId, AdminUserCreationDTO userRegistrationDTO, String adminUsername);
+
     List<EmployeesDto> getAllEmployees();
 }

@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final OrderRepository orderRepository;
 
     @Override
     public void createManager(AdminUserCreationDTO userCreationDTO, String adminUsername) {

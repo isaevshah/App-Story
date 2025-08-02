@@ -26,20 +26,28 @@ public class User {
     private LocalDateTime registrationAt;
     private LocalDateTime updatedAt;
     private String email;
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
     @Enumerated(EnumType.STRING)
     private UserType userType;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Profile profile;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Cart cart;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<PurchaseRequest> purchaseRequests;
+
     private boolean isActive;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Favorite> favorites;
 }

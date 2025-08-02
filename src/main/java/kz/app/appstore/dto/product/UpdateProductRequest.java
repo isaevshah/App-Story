@@ -14,5 +14,7 @@ public class UpdateProductRequest {
     private Long quantity;
     private String specificParams;
     private Boolean isHotProduct;
+    private Boolean isDeleted;
     private MultipartFile[] images;
+    private String existingImageUrls;
 }

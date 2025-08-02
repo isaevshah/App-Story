@@ -8,6 +8,9 @@ import kz.app.appstore.dto.product.CreateProductRequest;
 import kz.app.appstore.dto.product.ProductResponse;
 import kz.app.appstore.dto.product.ProductResponseDTO;
 import kz.app.appstore.dto.product.UpdateProductRequest;
+import kz.app.appstore.dto.search.CatalogSimpleDto;
+import kz.app.appstore.dto.search.ProductSimpleDto;
+import kz.app.appstore.dto.search.SearchResponse;
 import kz.app.appstore.entity.*;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.repository.*;
@@ -202,7 +205,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-
     private List<ProductImage> handleImages(MultipartFile[] images, Product product) throws IOException {
         List<ProductImage> productImages = new ArrayList<>();
         if (images != null) {
@@ -296,6 +298,7 @@ public class ProductServiceImpl implements ProductService {
             product.setQuantity(request.getQuantity());
             product.setUpdatedBy(username);
             product.setUpdatedAt(LocalDateTime.now());
+            product.setIsDeleted(request.getIsDeleted());
             product.setIsHotProduct(request.getIsHotProduct() != null && request.getIsHotProduct());
 
             handleSpecificParams(product, request.getSpecificParams());
@@ -336,6 +339,39 @@ public class ProductServiceImpl implements ProductService {
         product.setIsDeleted(true);
         productRepository.save(product);
         log.info("Product marked as deleted: {}", productId);
+    }
+
+    @Override
+    public SearchResponse searchAll(String query) {
+        String lowerQuery = query.trim().toLowerCase();
+
+        // 1. Поиск по коду (точное совпадение)
+        Product productByCode = productRepository.findByIndividualCode(query).orElse(null);
+
+        // 2. Поиск по имени товара или описанию
+        List<Product> products = productRepository.searchByNameOrDescription(lowerQuery);
+
+        // 3. Поиск по названию каталога
+        List<Catalog> catalogs = catalogRepository.searchByName(lowerQuery);
+
+        // маппинг в DTO
+        List<ProductSimpleDto> productDtos = products.stream()
+                .map(p -> new ProductSimpleDto(p.getId(), p.getDescription(), getFirstImage(p)))
+                .collect(Collectors.toList());
+
+        List<CatalogSimpleDto> catalogDtos = catalogs.stream()
+                .map(c -> new CatalogSimpleDto(c.getId(), c.getName()))
+                .collect(Collectors.toList());
+
+        ProductSimpleDto productByCodeDto = productByCode != null
+                ? new ProductSimpleDto(productByCode.getId(), productByCode.getDescription(), getFirstImage(productByCode))
+                : null;
+
+        return new SearchResponse(productDtos, catalogDtos, productByCodeDto);
+    }
+
+    private String getFirstImage(Product p) {
+        return p.getImages().isEmpty() ? null : p.getImages().getFirst().getImageUrl();
     }
 
     private ProductResponse convertToProductResponse(Product product) {
@@ -424,7 +460,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void updateProductImages(Product product, MultipartFile[] newImageFiles) throws IOException {
-        List<ProductImage> imagesToRemove = new ArrayList<>(product.getImages());
+//        List<ProductImage> imagesToRemove = new ArrayList<>(product.getImages());
         if (newImageFiles != null) {
             for (MultipartFile image : newImageFiles) {
                 if (!image.isEmpty()) {
@@ -436,11 +472,11 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
-        // Удаляем старые изображения, которых нет в новом наборе
-        product.getImages().removeAll(imagesToRemove);
-        for (ProductImage imageToRemove : imagesToRemove) {
-            imageToRemove.setProduct(null);
-        }
+//        // Удаляем старые изображения, которых нет в новом наборе
+//        product.getImages().removeAll(imagesToRemove);
+//        for (ProductImage imageToRemove : imagesToRemove) {
+//            imageToRemove.setProduct(null);
+//        }
     }
 
     private Boolean checkAndUpdateHotProductStatus() {

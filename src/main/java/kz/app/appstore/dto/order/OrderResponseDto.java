@@ -24,5 +24,6 @@ public class OrderResponseDto {
     private String point;
     private String username;
     private String fileName;
+    private String email;
     private List<OrderItemDto> items;
 }

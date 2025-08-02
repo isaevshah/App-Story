@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.view.RedirectView;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,8 +66,8 @@ public class MainController {
         List<FieldError> errors = bindingResult.getFieldErrors();
         Map<String, FieldErrorMessage> fields = new HashMap<>();
         if (!errors.isEmpty()) {
-            for (FieldError error: errors) {
-                fields.put(error.getField(),new FieldErrorMessage(
+            for (FieldError error : errors) {
+                fields.put(error.getField(), new FieldErrorMessage(
                         error.getDefaultMessage(),
                         error.getDefaultMessage()));
             }
@@ -83,7 +84,7 @@ public class MainController {
     public void handleRuntimeException(HttpServletResponse response,
                                        RuntimeException ex,
                                        WebRequest webRequest) throws IOException {
-        LOG.error("EXP",ex);
+        LOG.error("EXP", ex);
         handleException(
                 response,
                 ex,
@@ -104,6 +105,7 @@ public class MainController {
                 webRequest,
                 null);
     }
+
     private void handleException(HttpServletResponse response,
                                  Exception ex,
                                  HttpStatus httpStatus,
@@ -122,8 +124,7 @@ public class MainController {
             exceptionResponse.setFields(fields);
             messageLang.put("ru", "Валидация не успешна");
             messageLang.put("kk", "Валидация сәтсіз жүзеге асты");
-        }
-        else {
+        } else {
             messageLang.put("ru", ex.getMessage());
             messageLang.put("kk", ex.getMessage());
         }

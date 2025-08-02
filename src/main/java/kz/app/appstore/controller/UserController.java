@@ -9,6 +9,7 @@ import kz.app.appstore.dto.order.OrderResponseDto;
 import kz.app.appstore.dto.product.FavoriteProductResponse;
 import kz.app.appstore.dto.error.ErrorResponse;
 import kz.app.appstore.dto.user.UserInfoDto;
+import kz.app.appstore.dto.user.UserUpdateDto;
 import kz.app.appstore.exception.InsufficientStockException;
 import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.CreateOrderService;
@@ -157,15 +158,24 @@ public class UserController {
         return userService.getUserOrderById(id);
     }
 
+    @Operation(summary = "Создние товара", security = {@SecurityRequirement(name = "bearerAuth")})
     @PostMapping(value = "/create-order", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void createOrder(@RequestPart("data") OrderRequestDto request,
                             @RequestPart("file") MultipartFile file) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
-            createOrderService.saveKaspiCheck(request,username,file);
+            createOrderService.saveKaspiCheck(request, username, file);
         } catch (Exception e) {
             throw new RuntimeException();
         }
+    }
+
+    @Operation(summary = "Обновить профил", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PutMapping("/update-profile")
+    public void updateProfile(@RequestBody UserUpdateDto requestDto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        userService.updateProfile(requestDto, username);
     }
 }

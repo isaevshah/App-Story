@@ -25,7 +25,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> getAllOrders(int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
         Page<Order> orders = orderRepository.findAll(pageable);
         return orders.map(this::mapToOrderResponseDto);
@@ -33,7 +32,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<OrderResponseDto> getOrderByTrackStatus(int page, int size, String trackStatus) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         String normalizedSearch = trackStatus.trim();
         Page<Order> orderResult = orderRepository.findByTrackStatusContainingIgnoreCase(normalizedSearch, pageable);
         if (orderResult.hasContent()) {
@@ -57,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderResponseDto mapToOrderResponseDto(Order order) {
         return new OrderResponseDto(
                 order.getId(),
-                order.getOrderDate(),
+                order.getCreateDate(),
                 order.getPayStatus().name(),
                 order.getTrackStatus(),
                 order.getTotalPrice(),
@@ -69,6 +68,7 @@ public class OrderServiceImpl implements OrderService {
                 order.getPoint(),
                 order.getUser().getUsername(),
                 order.getKaspiCheckPath(),
+                order.getUser().getEmail(),
                 order.getOrderItems().stream().map(this::mapToOrderItemDto).collect(Collectors.toList())
         );
     }
