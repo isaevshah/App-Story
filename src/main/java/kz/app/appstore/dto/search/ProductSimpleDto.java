@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductSimpleDto {
     private Long id;
+    private String name;
+    private Double price;
     private String description;
     private String imageUrl;
 }

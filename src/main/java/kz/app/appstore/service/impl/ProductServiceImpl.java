@@ -356,7 +356,7 @@ public class ProductServiceImpl implements ProductService {
 
         // маппинг в DTO
         List<ProductSimpleDto> productDtos = products.stream()
-                .map(p -> new ProductSimpleDto(p.getId(), p.getDescription(), getFirstImage(p)))
+                .map(p -> new ProductSimpleDto(p.getId(), p.getName(), p.getPrice(), p.getDescription(), getFirstImage(p)))
                 .collect(Collectors.toList());
 
         List<CatalogSimpleDto> catalogDtos = catalogs.stream()
@@ -364,7 +364,7 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
 
         ProductSimpleDto productByCodeDto = productByCode != null
-                ? new ProductSimpleDto(productByCode.getId(), productByCode.getDescription(), getFirstImage(productByCode))
+                ? new ProductSimpleDto(productByCode.getId(), productByCode.getName(), productByCode.getPrice(), productByCode.getDescription(), getFirstImage(productByCode))
                 : null;
 
         return new SearchResponse(productDtos, catalogDtos, productByCodeDto);
