@@ -15,6 +15,7 @@ import kz.app.appstore.entity.*;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.repository.*;
 import kz.app.appstore.service.ProductService;
+import kz.app.appstore.utils.TransliterationUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -356,15 +357,15 @@ public class ProductServiceImpl implements ProductService {
 
         // маппинг в DTO
         List<ProductSimpleDto> productDtos = products.stream()
-                .map(p -> new ProductSimpleDto(p.getId(), p.getName(), p.getPrice(), p.getDescription(), getFirstImage(p)))
+                .map(p -> new ProductSimpleDto(p.getId(), p.getName(), TransliterationUtil.transliterate(p.getName()), p.getPrice(), p.getDescription(), getFirstImage(p)))
                 .collect(Collectors.toList());
 
         List<CatalogSimpleDto> catalogDtos = catalogs.stream()
-                .map(c -> new CatalogSimpleDto(c.getId(), c.getName()))
+                .map(c -> new CatalogSimpleDto(c.getId(), c.getName(), TransliterationUtil.transliterate(c.getName())))
                 .collect(Collectors.toList());
 
         ProductSimpleDto productByCodeDto = productByCode != null
-                ? new ProductSimpleDto(productByCode.getId(), productByCode.getName(), productByCode.getPrice(), productByCode.getDescription(), getFirstImage(productByCode))
+                ? new ProductSimpleDto(productByCode.getId(), productByCode.getName(), TransliterationUtil.transliterate(productByCode.getName()), productByCode.getPrice(), productByCode.getDescription(), getFirstImage(productByCode))
                 : null;
 
         return new SearchResponse(productDtos, catalogDtos, productByCodeDto);
@@ -391,6 +392,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getCatalog().getName(),
                 product.getIndividualCode(),
                 product.getName(),
+                TransliterationUtil.transliterate(product.getName()),
                 product.getPrice(),
                 product.getQuantity(),
                 product.getDescription(),
@@ -440,6 +442,7 @@ public class ProductServiceImpl implements ProductService {
         return new CatalogResponse(
                 catalog.getId(),
                 catalog.getName(),
+                TransliterationUtil.transliterate(catalog.getName()),
                 catalog.getDescription(),
                 parentCatalogResponse,
                 subCatalogResponses,

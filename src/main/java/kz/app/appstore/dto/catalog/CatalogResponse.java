@@ -12,6 +12,7 @@ import java.util.List;
 public class CatalogResponse {
     private Long id;
     private String name;
+    private String nameInEnglish;
     private String description;
     private ParentCatalogResponse parentCatalog;
     private List<CatalogResponse> subCatalogs;

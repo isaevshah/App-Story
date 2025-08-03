@@ -14,6 +14,7 @@ import kz.app.appstore.repository.FavoriteRepository;
 import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.FavoriteService;
+import kz.app.appstore.utils.TransliterationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -104,6 +105,7 @@ public class FavoriteServiceImpl implements FavoriteService {
                 product.getCatalog().getName(),
                 product.getIndividualCode(),
                 product.getName(),
+                TransliterationUtil.transliterate(product.getName()),
                 product.getPrice(),
                 product.getQuantity(),
                 product.getDescription(),

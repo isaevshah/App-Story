@@ -15,6 +15,7 @@ public class ProductResponse {
     private String categoryName;
     private String individualCode;
     private String name;
+    private String nameInEnglish;
     private Double price;
     private Long quantity;
     private String description;

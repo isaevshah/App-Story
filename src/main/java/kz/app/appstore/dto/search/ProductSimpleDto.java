@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class ProductSimpleDto {
     private Long id;
     private String name;
+    private String nameInEnglish;
     private Double price;
     private String description;
     private String imageUrl;
