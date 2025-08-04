@@ -345,27 +345,39 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public SearchResponse searchAll(String query) {
         String lowerQuery = query.trim().toLowerCase();
-
         // 1. Поиск по коду (точное совпадение)
         Product productByCode = productRepository.findByIndividualCode(query).orElse(null);
-
         // 2. Поиск по имени товара или описанию
         List<Product> products = productRepository.searchByNameOrDescription(lowerQuery);
-
-        // 3. Поиск по названию каталога
-        List<Catalog> catalogs = catalogRepository.searchByName(lowerQuery);
-
+        // 3. Каталоги из найденных товаров
+        Set<Catalog> uniqueCatalogs = products.stream()
+                .map(Product::getCatalog)
+                .collect(Collectors.toSet());
         // маппинг в DTO
         List<ProductSimpleDto> productDtos = products.stream()
-                .map(p -> new ProductSimpleDto(p.getId(), p.getName(), TransliterationUtil.transliterate(p.getName()), p.getPrice(), p.getDescription(), getFirstImage(p)))
-                .collect(Collectors.toList());
-
-        List<CatalogSimpleDto> catalogDtos = catalogs.stream()
-                .map(c -> new CatalogSimpleDto(c.getId(), c.getName(), TransliterationUtil.transliterate(c.getName())))
-                .collect(Collectors.toList());
-
+                .map(p -> new ProductSimpleDto(
+                        p.getId(),
+                        p.getName(),
+                        TransliterationUtil.transliterate(p.getName()),
+                        p.getPrice(),
+                        p.getDescription(),
+                        getFirstImage(p)
+                )).collect(Collectors.toList());
+        List<CatalogSimpleDto> catalogDtos = uniqueCatalogs.stream()
+                .map(c -> new CatalogSimpleDto(
+                        c.getId(),
+                        c.getName(),
+                        TransliterationUtil.transliterate(c.getName())
+                )).collect(Collectors.toList());
         ProductSimpleDto productByCodeDto = productByCode != null
-                ? new ProductSimpleDto(productByCode.getId(), productByCode.getName(), TransliterationUtil.transliterate(productByCode.getName()), productByCode.getPrice(), productByCode.getDescription(), getFirstImage(productByCode))
+                ? new ProductSimpleDto(
+                productByCode.getId(),
+                productByCode.getName(),
+                TransliterationUtil.transliterate(productByCode.getName()),
+                productByCode.getPrice(),
+                productByCode.getDescription(),
+                getFirstImage(productByCode)
+        )
                 : null;
 
         return new SearchResponse(productDtos, catalogDtos, productByCodeDto);
@@ -374,6 +386,7 @@ public class ProductServiceImpl implements ProductService {
     private String getFirstImage(Product p) {
         return p.getImages().isEmpty() ? null : p.getImages().getFirst().getImageUrl();
     }
+
 
     private ProductResponse convertToProductResponse(Product product) {
         ObjectMapper objectMapper = new ObjectMapper();
