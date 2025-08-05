@@ -13,6 +13,7 @@ import java.util.Map;
 public class ProductResponse {
     private Long id;
     private String categoryName;
+    private String categoryNameInEnglish;
     private String individualCode;
     private String name;
     private String nameInEnglish;

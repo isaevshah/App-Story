@@ -394,6 +394,7 @@ public class ProductServiceImpl implements ProductService {
         return new ProductResponse(
                 product.getId(),
                 product.getCatalog().getName(),
+                TransliterationUtil.transliterate(product.getCatalog().getName()),
                 product.getIndividualCode(),
                 product.getName(),
                 TransliterationUtil.transliterate(product.getName()),
