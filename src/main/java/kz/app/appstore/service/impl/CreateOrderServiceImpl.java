@@ -11,6 +11,7 @@ import kz.app.appstore.repository.ProductRepository;
 import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.service.CartService;
 import kz.app.appstore.service.CreateOrderService;
+import kz.app.appstore.utils.SaveFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,17 +76,6 @@ public class CreateOrderServiceImpl implements CreateOrderService {
         }
     }
 
-    private String savePdfFile(MultipartFile file) throws IOException {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path uploadDir = Paths.get(uploadPath);
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        Path filePath = uploadDir.resolve(fileName);
-        Files.write(filePath, file.getBytes());
-        return fileName;
-    }
-
     private kz.app.appstore.entity.Order createOrderEntity(OrderRequestDto request, User user, MultipartFile file) throws IOException {
         kz.app.appstore.entity.Order order = new kz.app.appstore.entity.Order();
         order.setUser(user);
@@ -98,7 +88,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
         order.setCity(request.getCity());
         order.setPhoneNumber(request.getPhoneNumber());
         order.setPoint(request.getPoint());
-        String fileName = savePdfFile(file);
+        String fileName = SaveFile.savePdfFile(file, uploadPath);
         order.setKaspiCheckPath(fileName); // добавь это поле в сущность Order
         return order;
     }

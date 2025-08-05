@@ -21,4 +21,6 @@ public class UserInfoDto {
     private Role role;
     private UserType userType;
     private boolean active;
+    private String email;
+    private String image;
 }

@@ -15,6 +15,7 @@ import kz.app.appstore.entity.*;
 import kz.app.appstore.exception.ProductCreationException;
 import kz.app.appstore.repository.*;
 import kz.app.appstore.service.ProductService;
+import kz.app.appstore.utils.SaveFile;
 import kz.app.appstore.utils.TransliterationUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,7 +74,7 @@ public class ProductServiceImpl implements ProductService {
         catalog.setCreatedAt(LocalDateTime.now());
         catalog.setCreatedBy(username);
 
-        String imageName = saveImageFile(catalogRequest.getImage());
+        String imageName = SaveFile.savePdfFile(catalogRequest.getImage(), uploadPath);
         catalog.setImageName(imageName);
 
         Catalog savedCatalog = catalogRepository.save(catalog);
@@ -89,7 +91,7 @@ public class ProductServiceImpl implements ProductService {
         catalog.setCreatedAt(LocalDateTime.now());
 
         if (catalogRequest.getImage() != null && !catalogRequest.getImage().isEmpty()) {
-            catalog.setImageName(saveImageFile(catalogRequest.getImage()));
+            catalog.setImageName(SaveFile.savePdfFile(catalogRequest.getImage(), uploadPath));
         }
         if (parentCatalogId != null) {
             Catalog parent = catalogRepository.findById(parentCatalogId)
@@ -211,7 +213,7 @@ public class ProductServiceImpl implements ProductService {
         if (images != null) {
             for (MultipartFile image : images) {
                 if (!image.isEmpty()) {
-                    String fileName = saveImageFile(image);
+                    String fileName = SaveFile.savePdfFile(image, uploadPath);
                     ProductImage productImage = new ProductImage();
                     productImage.setImageUrl(fileName);
                     productImages.add(productImage);
@@ -220,17 +222,6 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         return productImages;
-    }
-
-    private String saveImageFile(MultipartFile image) throws IOException {
-        String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-        Path uploadDir = Paths.get(uploadPath);
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        Path filePath = uploadDir.resolve(fileName);
-        Files.write(filePath, image.getBytes());
-        return fileName;
     }
 
     private ProductResponseDTO createResponseDTO(Product product) {
@@ -303,7 +294,7 @@ public class ProductServiceImpl implements ProductService {
             product.setIsHotProduct(request.getIsHotProduct() != null && request.getIsHotProduct());
 
             handleSpecificParams(product, request.getSpecificParams());
-            updateProductImages(product, request.getImages());
+            updateProductImages(product, request.getImages(), request.getExistingImageUrls(), request.getDeletedImageUrls());
 
             productRepository.save(product);
         } catch (IOException e) {
@@ -328,7 +319,7 @@ public class ProductServiceImpl implements ProductService {
         catalog.setUpdatedBy(username);
         catalog.setUpdatedAt(LocalDateTime.now());
         if (catalogRequest.getImage() != null) {
-            catalog.setImageName(saveImageFile(catalogRequest.getImage()));
+            catalog.setImageName(SaveFile.savePdfFile(catalogRequest.getImage(), uploadPath));
         }
         catalogRepository.save(catalog);
     }
@@ -475,12 +466,26 @@ public class ProductServiceImpl implements ProductService {
         return code.toString();
     }
 
-    private void updateProductImages(Product product, MultipartFile[] newImageFiles) throws IOException {
-//        List<ProductImage> imagesToRemove = new ArrayList<>(product.getImages());
+    private void updateProductImages(Product product, MultipartFile[] newImageFiles, List<String> existingImageUrls, List<String> deletedImageUrls) throws IOException {
+        // Удаляем изображения, указанные в deletedImageUrls
+        if (deletedImageUrls != null && !deletedImageUrls.isEmpty()) {
+            Iterator<ProductImage> iterator = product.getImages().iterator();
+            while (iterator.hasNext()) {
+                ProductImage image = iterator.next();
+                if (deletedImageUrls.contains(image.getImageUrl())) {
+                    iterator.remove(); // удаляем из списка
+                    image.setProduct(null); // обрываем связь
+                    // можно также удалить физически файл, если нужно:
+                     Files.deleteIfExists(Paths.get(uploadPath + File.separator + image.getImageUrl()));
+                }
+            }
+        }
+
+        // Добавляем новые изображения
         if (newImageFiles != null) {
             for (MultipartFile image : newImageFiles) {
                 if (!image.isEmpty()) {
-                    String fileName = saveImageFile(image);
+                    String fileName = SaveFile.savePdfFile(image, uploadPath);
                     ProductImage productImage = new ProductImage();
                     productImage.setImageUrl(fileName);
                     productImage.setProduct(product);
@@ -488,11 +493,6 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
-//        // Удаляем старые изображения, которых нет в новом наборе
-//        product.getImages().removeAll(imagesToRemove);
-//        for (ProductImage imageToRemove : imagesToRemove) {
-//            imageToRemove.setProduct(null);
-//        }
     }
 
     private Boolean checkAndUpdateHotProductStatus() {

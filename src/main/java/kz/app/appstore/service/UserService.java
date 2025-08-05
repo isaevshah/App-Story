@@ -16,12 +16,15 @@ import kz.app.appstore.enums.UserType;
 import kz.app.appstore.repository.OrderRepository;
 import kz.app.appstore.repository.UserRepository;
 import kz.app.appstore.repository.VerificationRepository;
+import kz.app.appstore.utils.SaveFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -43,6 +46,9 @@ public class UserService {
 
     @Autowired
     private VerificationRepository verificationRepository;
+
+    @Value("${upload.path}")
+    private String uploadPath;
 
     public void registerUser(UserRegistrationDTO registrationDTO) throws Exception {
         // Проверяем, существует ли пользователь
@@ -99,7 +105,7 @@ public class UserService {
         verificationRepository.save(verification);
     }
 
-    public void updateProfile(UserUpdateDto dto, String username) {
+    public void updateProfile(UserUpdateDto dto, String username) throws IOException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -126,6 +132,9 @@ public class UserService {
         if (dto.getPhoneNumber() != null) {
             profile.setPhoneNumber(dto.getPhoneNumber());
         }
+
+        String imageName = SaveFile.savePdfFile(dto.getImage(), uploadPath);
+        profile.setImage(imageName);
 
         user.setProfile(profile);
         profile.setUser(user);
@@ -187,7 +196,9 @@ public class UserService {
                 profile.getCompanyName(),
                 user.getRole(),
                 user.getUserType(),
-                user.isActive()
+                user.isActive(),
+                user.getEmail(),
+                profile.getImage()
         );
     }
 

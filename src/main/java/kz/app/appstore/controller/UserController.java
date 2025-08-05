@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -173,7 +174,7 @@ public class UserController {
 
     @Operation(summary = "Обновить профил", security = {@SecurityRequirement(name = "bearerAuth")})
     @PutMapping("/update-profile")
-    public void updateProfile(@RequestBody UserUpdateDto requestDto) {
+    public void updateProfile(@ModelAttribute UserUpdateDto requestDto) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         userService.updateProfile(requestDto, username);

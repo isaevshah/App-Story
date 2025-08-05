@@ -17,6 +17,7 @@ public class Profile {
     private String phoneNumber;
     private String firstName;
     private String lastName;
+    private String image;
     // Поля для Юр-лица
     private String bin;
     private String companyName;
