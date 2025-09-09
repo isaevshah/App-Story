@@ -56,13 +56,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of("https://app-store-murex.vercel.app")); // Разрешаем ваш фронтенд
-//       configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Разрешаем ваш фронтендкоя
-         configuration.setAllowedOrigins(List.of("https://www.kupidai.kz")); // Разрешаем ваш фронтендкоя
-//        configuration.setAllowedOrigins(List.of("https://v0-next-js-code-request-ybm1kv.  vercel.app")); // Разрешаем ваш фронтенд
+
+        // либо так, если хочешь разрешить все
+//        configuration.addAllowedOriginPattern("*");
+
+        // либо так, если хочешь только конкретные
+         configuration.setAllowedOrigins(List.of(
+             "https://kupidai.kz",
+             "https://www.kupidai.kz",
+             "http://localhost:3000"
+         ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setAllowCredentials(true); // Если используете куки или авторизацию
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
