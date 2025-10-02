@@ -58,14 +58,14 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // либо так, если хочешь разрешить все
-        configuration.addAllowedOriginPattern("*");
+//        configuration.addAllowedOriginPattern("*");
 
         // либо так, если хочешь только конкретные
-//         configuration.setAllowedOrigins(List.of(
-//             "https://kupidai.kz",
-//             "https://www.kupidai.kz",
-//             "http://localhost:3000"
-//         ));
+         configuration.setAllowedOrigins(List.of(
+             "https://kupidai.kz",
+             "https://www.kupidai.kz",
+             "http://localhost:3000"
+         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
