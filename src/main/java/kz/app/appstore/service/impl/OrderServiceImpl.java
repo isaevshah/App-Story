@@ -25,7 +25,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponseDto> getAllOrders(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
         Page<Order> orders = orderRepository.findAll(pageable);
         return orders.map(this::mapToOrderResponseDto);
     }
